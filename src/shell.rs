@@ -8,7 +8,7 @@ pub fn pure_lisp_interpreter_message() {
 
 
 
-fn paren_balance(command: &String) -> i16{
+fn paren_balance(command: &str) -> i16{
     let mut bal: i16 = 0; 
     
     for c in command.chars() {
