@@ -1,13 +1,15 @@
 
-
+mod lexer;
 mod parse;
 mod shell;
+
+use lexer::*;
 use parse::*;
 use shell::*;
 
 
-fn main() {
 
+fn main() {
     pure_lisp_interpreter_message();
 
     loop {
@@ -20,6 +22,4 @@ fn main() {
             Err(error) => print!("{}", error),
         }
     }
-
-
 }
