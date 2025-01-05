@@ -70,6 +70,10 @@ mod tests {
         input = String::from("+");
         expected = String::from("+");
         assert_eq!(space_inputs(input), expected);
+
+        input = String::from("");
+        expected = String::from("");
+        assert_eq!(space_inputs(input), expected);
     }
 
     #[test]
@@ -84,6 +88,10 @@ mod tests {
 
         input = "+";
         expected = vec!["+"];
+        assert_eq!(space_separate_inputs(input), expected);
+
+        input = "";
+        expected = Vec::new();
         assert_eq!(space_separate_inputs(input), expected);
     }
 
@@ -120,5 +128,10 @@ mod tests {
         expected = vec![Token::Symbol(String::from("-"))];
         result = tokenize_inputs(input); 
         assert_eq!(compare_token_vectors(expected, result), false);
+
+        input = Vec::new();
+        expected = Vec::new();
+        result = tokenize_inputs(input); 
+        assert!(compare_token_vectors(expected, result));
     }
 }
