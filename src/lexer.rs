@@ -134,4 +134,33 @@ mod tests {
         result = tokenize_inputs(input); 
         assert!(compare_token_vectors(expected, result));
     }
+
+    #[test]
+    fn test_tokenize() {
+
+        let mut input = String::from("(+)"); 
+        let mut expected: Vec<Token> = vec![Token::LParen, Token::Symbol(String::from("+")), Token::RParen]; 
+        let mut result = tokenize(input); 
+        assert!(compare_token_vectors(expected, result));
+
+        input = String::from("()");
+        expected = vec![Token::LParen, Token::RParen];
+        result = tokenize(input); 
+        assert!(compare_token_vectors(expected, result));
+
+        input = String::from("+");
+        expected = vec![Token::Symbol(String::from("+"))];
+        result = tokenize(input); 
+        assert!(compare_token_vectors(expected, result));
+
+        input = String::from("+");
+        expected = vec![Token::Symbol(String::from("-"))];
+        result = tokenize(input); 
+        assert_eq!(compare_token_vectors(expected, result), false);
+
+        input = String::new();
+        expected = Vec::new();
+        result = tokenize(input); 
+        assert!(compare_token_vectors(expected, result));
+    }
 }
