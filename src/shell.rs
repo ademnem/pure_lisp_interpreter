@@ -53,16 +53,19 @@ pub fn get_command() -> Result<String, String> {
         return Err(String::from("too many closing parens"));
     }
 
-    Ok(input)
+    Ok(input.to_uppercase())
 }
 
 
 
 pub fn match_command(command: String) -> i8 { 
     match command.as_str() {
-        "exit\n" => 0, // return an option that either fails or does not
+        "EXIT\n" => 0, // return an option that either fails or does not
         _ => {
             print!("{}", command);
+            // lexer
+            // parser
+            // evaluator
             1
         },
     }
