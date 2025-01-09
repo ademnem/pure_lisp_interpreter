@@ -2,6 +2,14 @@ use std::io::{stdin, stdout, Write};
 use std::string::String;
 use std::result::Result;
 
+
+
+
+pub const EXIT: i8 = -1;
+pub const CONTINUE: i8 = 0;
+
+
+
 pub fn pure_lisp_interpreter_message() {
     println!("--== Pure Lisp Interpreter ==--");
 }
@@ -20,6 +28,16 @@ fn paren_balance(command: &str) -> i16{
     }
 
     bal
+}
+fn rparen_is_last(input: &String) -> bool {
+    // if there are inputs before the first (, only the first argument will be evaluated 
+    if input.starts_with('(') {
+        match input.rfind(')') {
+            Some(pos) => return pos == input.len() - 1,
+            None => return false,
+        }    
+    }
+    true
 }
 
 
@@ -51,6 +69,8 @@ pub fn get_command() -> Result<String, String> {
 
     if paren_balance(&input) < 0 {
         return Err(String::from("too many closing parens"));
+    } else if !rparen_is_last(&input) {
+        return Err(String::from("input starting with a '(' must end with ')'"));
     }
 
     Ok(input.to_uppercase())
@@ -59,14 +79,15 @@ pub fn get_command() -> Result<String, String> {
 
 
 pub fn match_command(command: String) -> i8 { 
-    match command.as_str() {
-        "EXIT\n" => 0, // return an option that either fails or does not
-        _ => {
-            print!("{}", command);
+    match command.replace(" ", "").as_str() {
+        "EXIT\n" => EXIT,
+        "\n" => { print!(""); CONTINUE },
+        _ => { 
             // lexer
             // parser
             // evaluator
-            1
+            print!("{}", command); // print here
+            CONTINUE
         },
     }
 }
@@ -93,6 +114,21 @@ mod tests {
 
         command = String::from("(hello world)");
         assert_eq!(paren_balance(&command), 0);  
+    }
+
+    #[test]
+    fn test_rparen_is_last() {
+        let mut input = String::new();
+        assert!(rparen_is_last(&input));
+
+        input = String::from("()");
+        assert!(rparen_is_last(&input));
+
+        input = String::from("+ () +");
+        assert!(rparen_is_last(&input));
+
+        input = String::from("( + ) +");
+        assert!(!rparen_is_last(&input));
     }
 }
 
