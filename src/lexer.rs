@@ -1,7 +1,7 @@
 
 
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token {
     Integer(i64),
     Symbol(String),
@@ -25,7 +25,8 @@ fn tokenize_inputs(input: Vec<&str>) -> Vec<Token> {
     
     let mut tokens: Vec<Token> = Vec::new();
 
-    for part in input.clone() {
+    // need to reverse for parsing vec using .push() and .pop()
+    for &part in input.iter().rev() { 
         match part {
             "(" => tokens.push(Token::LParen),
             ")" => tokens.push(Token::RParen),
@@ -96,10 +97,10 @@ mod tests {
     }
 
     
-    fn compare_token_vectors(expected: Vec<Token>, result: Vec<Token>) -> bool {
-        let comp = expected.iter().zip(&result);
-        for (e, r) in comp {
-            if e != r {
+    fn compare_token_vectors(result: Vec<Token>, expected: Vec<Token>) -> bool {
+        let comp = result.iter().zip(&expected);
+        for (r, e) in comp {
+            if r != e {
                 return false;
             }
         }
@@ -110,57 +111,57 @@ mod tests {
     fn test_tokenize_inputs() {
 
         let mut input: Vec<&str> = vec!["(", "+", ")"];
-        let mut expected: Vec<Token> = vec![Token::LParen, Token::Symbol(String::from("+")), Token::RParen]; 
         let mut result = tokenize_inputs(input); 
-        assert!(compare_token_vectors(expected, result));
+        let mut expected: Vec<Token> = vec![Token::RParen, Token::Symbol(String::from("+")), Token::LParen]; 
+        assert!(compare_token_vectors(result, expected));
 
         input = vec!["(", ")"];
-        expected = vec![Token::LParen, Token::RParen];
         result = tokenize_inputs(input); 
-        assert!(compare_token_vectors(expected, result));
+        expected = vec![Token::RParen, Token::LParen];
+        assert!(compare_token_vectors(result, expected));
 
         input = vec!["+"];
+        result = tokenize_inputs(input); 
         expected = vec![Token::Symbol(String::from("+"))];
-        result = tokenize_inputs(input); 
-        assert!(compare_token_vectors(expected, result));
+        assert!(compare_token_vectors(result, expected));
 
         input = vec!["+"];
-        expected = vec![Token::Symbol(String::from("-"))];
         result = tokenize_inputs(input); 
-        assert_eq!(compare_token_vectors(expected, result), false);
+        expected = vec![Token::Symbol(String::from("-"))];
+        assert!(!compare_token_vectors(result, expected));
 
         input = Vec::new();
-        expected = Vec::new();
         result = tokenize_inputs(input); 
-        assert!(compare_token_vectors(expected, result));
+        expected = Vec::new();
+        assert!(compare_token_vectors(result, expected));
     }
 
     #[test]
     fn test_tokenize() {
 
         let mut input = String::from("(+)"); 
-        let mut expected: Vec<Token> = vec![Token::LParen, Token::Symbol(String::from("+")), Token::RParen]; 
         let mut result = tokenize(input); 
-        assert!(compare_token_vectors(expected, result));
+        let mut expected: Vec<Token> = vec![Token::RParen, Token::Symbol(String::from("+")), Token::LParen]; 
+        assert!(compare_token_vectors(result, expected));
 
         input = String::from("()");
-        expected = vec![Token::LParen, Token::RParen];
         result = tokenize(input); 
-        assert!(compare_token_vectors(expected, result));
+        expected = vec![Token::RParen, Token::LParen];
+        assert!(compare_token_vectors(result, expected));
 
         input = String::from("+");
+        result = tokenize(input); 
         expected = vec![Token::Symbol(String::from("+"))];
-        result = tokenize(input); 
-        assert!(compare_token_vectors(expected, result));
+        assert!(compare_token_vectors(result, expected));
 
         input = String::from("+");
-        expected = vec![Token::Symbol(String::from("-"))];
         result = tokenize(input); 
-        assert_eq!(compare_token_vectors(expected, result), false);
+        expected = vec![Token::Symbol(String::from("-"))];
+        assert!(!compare_token_vectors(result, expected));
 
         input = String::new();
-        expected = Vec::new();
         result = tokenize(input); 
-        assert!(compare_token_vectors(expected, result));
+        expected = Vec::new();
+        assert!(compare_token_vectors(result, expected));
     }
 }
