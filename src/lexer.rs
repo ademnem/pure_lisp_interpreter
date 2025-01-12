@@ -25,8 +25,7 @@ fn tokenize_inputs(input: Vec<&str>) -> Vec<Token> {
     
     let mut tokens: Vec<Token> = Vec::new();
 
-    // need to reverse for parsing vec using .push() and .pop()
-    for &part in input.iter().rev() { 
+    for part in input { 
         match part {
             "(" => tokens.push(Token::LParen),
             ")" => tokens.push(Token::RParen),
@@ -112,12 +111,12 @@ mod tests {
 
         let mut input: Vec<&str> = vec!["(", "+", ")"];
         let mut result = tokenize_inputs(input); 
-        let mut expected: Vec<Token> = vec![Token::RParen, Token::Symbol(String::from("+")), Token::LParen]; 
+        let mut expected: Vec<Token> = vec![Token::LParen, Token::Symbol(String::from("+")), Token::RParen]; 
         assert!(compare_token_vectors(result, expected));
 
         input = vec!["(", ")"];
         result = tokenize_inputs(input); 
-        expected = vec![Token::RParen, Token::LParen];
+        expected = vec![Token::LParen, Token::RParen];
         assert!(compare_token_vectors(result, expected));
 
         input = vec!["+"];
@@ -141,12 +140,12 @@ mod tests {
 
         let mut input = String::from("(+)"); 
         let mut result = tokenize(input); 
-        let mut expected: Vec<Token> = vec![Token::RParen, Token::Symbol(String::from("+")), Token::LParen]; 
+        let mut expected: Vec<Token> = vec![Token::LParen, Token::Symbol(String::from("+")), Token::RParen]; 
         assert!(compare_token_vectors(result, expected));
 
         input = String::from("()");
         result = tokenize(input); 
-        expected = vec![Token::RParen, Token::LParen];
+        expected = vec![Token::LParen, Token::RParen];
         assert!(compare_token_vectors(result, expected));
 
         input = String::from("+");
