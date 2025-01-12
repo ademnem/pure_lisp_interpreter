@@ -1,8 +1,8 @@
 
 
 
-#[derive(PartialEq, Eq)]
-enum Token {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Token {
     Integer(i64),
     Symbol(String),
     LParen,
