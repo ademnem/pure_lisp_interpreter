@@ -59,6 +59,7 @@ mod tests {
 
     #[test]
     fn test_space_inputs() {
+
         let mut input = String::from("(+)"); 
         let mut expected = String::from(" ( + ) ");
         assert_eq!(space_inputs(input), expected);
@@ -78,6 +79,7 @@ mod tests {
 
     #[test]
     fn test_space_separate_inputs() {
+
         let mut input = " ( + ) ";
         let mut expected: Vec<&str> = vec!["(", "+", ")"];
         assert_eq!(space_separate_inputs(input), expected);
@@ -97,6 +99,7 @@ mod tests {
 
     
     fn compare_token_vectors(result: Vec<Token>, expected: Vec<Token>) -> bool {
+
         let comp = result.iter().zip(&expected);
         for (r, e) in comp {
             if r != e {

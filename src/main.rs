@@ -14,11 +14,7 @@ fn main() {
 
     loop {
         match get_command() {
-            Ok(command) => {
-                if match_command(command) == 0 {
-                    break;
-                }
-            }
+            Ok(command) => if match_command(command) == EXIT { break; },
             Err(error) => print!("{}", error),
         }
     }

@@ -17,6 +17,7 @@ pub fn pure_lisp_interpreter_message() {
 
 
 fn paren_balance(command: &str) -> i16{
+
     let mut bal: i16 = 0; 
     
     for c in command.chars() {
@@ -30,6 +31,7 @@ fn paren_balance(command: &str) -> i16{
     bal
 }
 fn rparen_is_last(input: &String) -> bool {
+
     // if there are inputs before the first (, only the first argument will be evaluated 
     if input.starts_with('(') {
         match input.rfind(')') {
@@ -79,6 +81,7 @@ pub fn get_command() -> Result<String, String> {
 
 
 pub fn match_command(command: String) -> i8 { 
+
     match command.replace(" ", "").as_str() {
         "EXIT\n" => EXIT,
         "\n" => { print!(""); CONTINUE },
@@ -100,6 +103,7 @@ mod tests {
 
     #[test]
     fn test_paren_balance() {
+
         let mut command = String::new();
         assert_eq!(paren_balance(&command), 0);  
 
@@ -118,6 +122,7 @@ mod tests {
 
     #[test]
     fn test_rparen_is_last() {
+
         let mut input = String::new();
         assert!(rparen_is_last(&input));
 
