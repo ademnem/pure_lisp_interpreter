@@ -4,12 +4,6 @@ use std::result::Result;
 
 
 
-
-pub const EXIT: i8 = -1;
-pub const CONTINUE: i8 = 0;
-
-
-
 pub fn pure_lisp_interpreter_message() {
     println!("--== Pure Lisp Interpreter ==--");
 }
@@ -76,23 +70,6 @@ pub fn get_command() -> Result<String, String> {
     }
 
     Ok(input.to_uppercase())
-}
-
-
-
-pub fn match_command(command: String) -> i8 { 
-
-    match command.replace(" ", "").as_str() {
-        "EXIT\n" => EXIT,
-        "\n" => { print!(""); CONTINUE },
-        _ => { 
-            // lexer
-            // parser
-            // evaluator
-            print!("{}", command); // print here
-            CONTINUE
-        },
-    }
 }
 
 
