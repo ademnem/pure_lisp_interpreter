@@ -20,13 +20,13 @@ static OBLIST: Vec<(String, Sexpr)> = Vec::new();
 fn match_command(command: String) -> i8 { 
 
     match command.replace(" ", "").as_str() {
-        "EXIT\n" => EXIT,
-        "\n" => { print!(""); CONTINUE },
+        "EXIT" => EXIT,
+        "" => CONTINUE,
         _ => { 
             // lexer
             // parser
             // eval (clone OBLIST)
-            print!("{}", command); // print here
+            println!("{}", command); // print here
             CONTINUE
         },
     }
@@ -40,7 +40,7 @@ fn main() {
     loop {
         match get_command() {
             Ok(command) => if match_command(command) == EXIT { break; },
-            Err(error) => print!("Error: {}", error),
+            Err(error) => println!("Error: {}", error),
         }
     }
 }

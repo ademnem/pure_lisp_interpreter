@@ -28,8 +28,8 @@ fn rparen_is_last(input: &String) -> bool {
 
     // if there are inputs before the first (, only the first argument will be evaluated 
     if input.starts_with('(') {
-        match input.rfind(')') {
-            Some(pos) => return pos == input.len() - 1,
+        match input.chars().last() {
+            Some(c) => return c == ')',
             None => return false,
         }    
     }
@@ -59,13 +59,17 @@ pub fn get_command() -> Result<String, String> {
     let mut input = String::new(); 
 
     input += &get_command_new_line();
+    let _ = input.pop();
     while paren_balance(&input) > 0 {
         input += &get_command_line(); 
+        let _ = input.pop();
     }
 
     if paren_balance(&input) < 0 {
         return Err(String::from("too many closing parens"));
     } else if !rparen_is_last(&input) {
+        println!("{input}");
+        println!("{}", input.find("\n").unwrap());
         return Err(String::from("input starting with a '(' must end with ')'"));
     }
 
@@ -104,6 +108,9 @@ mod tests {
         assert!(rparen_is_last(&input));
 
         input = String::from("()");
+        assert!(rparen_is_last(&input));
+
+        input = String::from("(     +     1     2)");
         assert!(rparen_is_last(&input));
 
         input = String::from("+ () +");
