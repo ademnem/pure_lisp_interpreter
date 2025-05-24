@@ -1,11 +1,10 @@
-
-
 use crate::lexer::*;
 
-
+// clone makes a deep copy of Sexpr
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Sexpr {
     Integer(i64),
+    String(String),
     Symbol(String),
     List(Vec<Sexpr>),
     Lambda(String, Vec<Sexpr>),
@@ -13,23 +12,24 @@ pub enum Sexpr {
     Nil,
 }
 
-
-
-fn parse_atom(tokens: &Vec<Token>) -> Sexpr {    
-    match tokens.first().unwrap() {
+fn parse_atom(token: &Token) -> Sexpr {
+    match token {
         Token::Integer(i) => Sexpr::Integer(*i),
-        Token::Symbol(s) => Sexpr::Symbol(s.to_string()),
+        Token::String(s) => Sexpr::String(s.clone()),
+        Token::Symbol(s) => match s.as_str() {
+            "T" => Sexpr::T,
+            _ => Sexpr::Symbol(s.to_string()),
+        },
         _ => Sexpr::Nil, // should never be reached
     }
 }
-fn is_list(tokens: &Vec<Token>) -> bool { 
+fn is_list(tokens: &Vec<Token>) -> bool {
     match tokens.first().unwrap() {
         Token::LParen => true,
         _ => false,
     }
 }
 fn parse_list(tokens: &mut Vec<Token>) -> Sexpr {
-    
     let _ = tokens.pop(); // remove first RParen
 
     let mut list: Vec<Sexpr> = Vec::new();
@@ -41,76 +41,88 @@ fn parse_list(tokens: &mut Vec<Token>) -> Sexpr {
 
     while !tokens.is_empty() {
         let token = tokens.pop();
-        if token.is_some() {        
+        if token.is_some() {
+            // rewrite using parse_atom
             match token.unwrap() {
-                Token::Integer(i) => { list.push(Sexpr::Integer(i)); },
-                Token::Symbol(s) => { list.push(Sexpr::Symbol(s)); },
-                Token::RParen => { list.push(parse_list(tokens)); },
-                Token::LParen => { return Sexpr::List(list); },   
+                Token::RParen => {
+                    list.push(parse_list(tokens));
+                    // what happens here?
+                    // it should stop
+                }
+                Token::LParen => {
+                    return Sexpr::List(list);
+                }
+                t => {
+                    list.push(parse_atom(&t));
+                }
             }
         }
     }
     Sexpr::List(list)
 }
 
-
 // due to the shell assume all inputs have balanced parens or only one input
-pub fn parse(tokens: &mut Vec<Token>) -> Sexpr  {
-
+pub fn parse(tokens: &mut Vec<Token>) -> Sexpr {
     if is_list(tokens) {
         tokens.reverse();
         return parse_list(tokens);
     }
-    parse_atom(tokens)
+    parse_atom(tokens.first().unwrap())
 }
 
-
+// eval_defun
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ptr;
 
     #[test]
     fn test_parse_atom() {
-
-        let mut input: Vec<Token> = vec![Token::Integer(51)];
-        let mut expected: Sexpr = Sexpr::Integer(51); 
+        let mut input: Token = Token::Integer(51);
+        let mut expected: Sexpr = Sexpr::Integer(51);
         assert_eq!(parse_atom(&input), expected);
 
-        input = vec![Token::Symbol(String::from("+"))];
+        input = Token::Symbol(String::from("+"));
         expected = Sexpr::Symbol(String::from("+"));
+        assert_eq!(parse_atom(&input), expected);
+
+        input = Token::Symbol(String::from("T"));
+        expected = Sexpr::T;
         assert_eq!(parse_atom(&input), expected);
     }
 
     #[test]
     fn test_is_list() {
-
-        let mut input: Vec<Token> = vec![Token::LParen, Token::RParen]; 
+        let mut input: Vec<Token> = vec![Token::LParen, Token::RParen];
         assert!(is_list(&input));
 
-        input = vec![Token::LParen, Token::Symbol(String::from("+")), Token::Integer(1), Token::Integer(1),  Token::RParen];
+        input = vec![
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::Integer(1),
+            Token::Integer(1),
+            Token::RParen,
+        ];
         assert!(is_list(&input));
 
         input = vec![Token::Symbol(String::from("+"))];
         assert!(!is_list(&input));
     }
 
-
     fn unpack_list(list: &Sexpr) -> Result<&Vec<Sexpr>, &str> {
-
         match list {
             Sexpr::List(vec) => Ok(&vec),
             _ => Err(""),
         }
     }
     fn equal_object_lists(result: &Sexpr, expected: &Sexpr) -> bool {
-
         let vec_result = unpack_list(&result).unwrap();
 
         let vec_expected = unpack_list(&expected).unwrap();
         let comp = vec_result.iter().zip(vec_expected);
-        
-        for (r, e) in comp {  
+
+        for (r, e) in comp {
             /* // when the test fails, this prints out
             match r {
                 Sexpr::Symbol(_) => print!("s "),
@@ -124,10 +136,18 @@ mod tests {
                 Sexpr::List(_) => println!("l"),
                 _ => {},
             }
-            */ 
+            */
             match r {
-                Sexpr::List(_) => if !equal_object_lists(r, e) { return false; },
-                _ => if r != e { return false; },
+                Sexpr::List(_) => {
+                    if !equal_object_lists(r, e) {
+                        return false;
+                    }
+                }
+                _ => {
+                    if r != e {
+                        return false;
+                    }
+                }
             }
         }
 
@@ -136,7 +156,6 @@ mod tests {
 
     #[test]
     fn test_parse_list() {
-
         let mut input: Vec<Token> = vec![Token::LParen, Token::RParen];
         input.reverse();
         let mut result: Sexpr = parse_list(&mut input);
@@ -144,27 +163,49 @@ mod tests {
         let mut expected: Sexpr = Sexpr::List(output);
         assert!(equal_object_lists(&result, &expected));
 
-
-        input = vec![Token::LParen, Token::Symbol(String::from("+")), Token::Integer(1), Token::Integer(1),  Token::RParen];
+        input = vec![
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::Integer(1),
+            Token::Integer(1),
+            Token::RParen,
+        ];
         input.reverse();
         result = parse_list(&mut input);
-        output = vec![Sexpr::Symbol(String::from("+")), Sexpr::Integer(1), Sexpr::Integer(1)];
+        output = vec![
+            Sexpr::Symbol(String::from("+")),
+            Sexpr::Integer(1),
+            Sexpr::Integer(1),
+        ];
         expected = Sexpr::List(output);
         assert!(equal_object_lists(&result, &expected));
 
-        input = vec![Token::LParen, Token::Symbol(String::from("+")), Token::LParen, Token::Symbol(String::from("+")), Token::Integer(1), Token::Integer(1),  Token::RParen, Token::Integer(1),  Token::RParen];
+        input = vec![
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::Integer(1),
+            Token::Integer(1),
+            Token::RParen,
+            Token::Integer(1),
+            Token::RParen,
+        ];
         input.reverse();
         result = parse_list(&mut input);
-        let output2 = vec![Sexpr::Symbol(String::from("+")), expected, Sexpr::Integer(1)];
+        let output2 = vec![
+            Sexpr::Symbol(String::from("+")),
+            expected,
+            Sexpr::Integer(1),
+        ];
         let expected2 = Sexpr::List(output2);
         assert!(equal_object_lists(&result, &expected2));
     }
 
     #[test]
     fn test_parse() {
-
         let mut input: Vec<Token> = vec![Token::Integer(51)];
-        let mut result: Sexpr = Sexpr::Integer(51); 
+        let mut result: Sexpr = Sexpr::Integer(51);
         assert_eq!(parse(&mut input), result);
 
         input = vec![Token::Symbol(String::from("+"))];
@@ -177,16 +218,72 @@ mod tests {
         let mut expected: Sexpr = Sexpr::List(output);
         assert!(equal_object_lists(&result, &expected));
 
-        input = vec![Token::LParen, Token::Symbol(String::from("+")), Token::Integer(1), Token::Integer(1),  Token::RParen];
+        input = vec![
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::Integer(1),
+            Token::Integer(1),
+            Token::RParen,
+        ];
         result = parse(&mut input);
-        output = vec![Sexpr::Symbol(String::from("+")), Sexpr::Integer(1), Sexpr::Integer(1)];
+        output = vec![
+            Sexpr::Symbol(String::from("+")),
+            Sexpr::Integer(1),
+            Sexpr::Integer(1),
+        ];
         expected = Sexpr::List(output);
         assert!(equal_object_lists(&result, &expected));
 
-        input = vec![Token::LParen, Token::Symbol(String::from("+")), Token::LParen, Token::Symbol(String::from("+")), Token::Integer(1), Token::Integer(1),  Token::RParen, Token::Integer(1),  Token::RParen];
+        input = vec![
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::LParen,
+            Token::Symbol(String::from("+")),
+            Token::Integer(1),
+            Token::Integer(1),
+            Token::RParen,
+            Token::Integer(1),
+            Token::RParen,
+        ];
         result = parse(&mut input);
-        let output2 = vec![Sexpr::Symbol(String::from("+")), expected, Sexpr::Integer(1)];
+        let output2 = vec![
+            Sexpr::Symbol(String::from("+")),
+            expected,
+            Sexpr::Integer(1),
+        ];
         let expected2 = Sexpr::List(output2);
         assert!(equal_object_lists(&result, &expected2));
+    }
+
+    #[test]
+    fn test_sexpr_clone() {
+        let mut original = Sexpr::Integer(10);
+        let mut clone = original.clone();
+        assert_eq!(original, clone);
+        assert!(!ptr::eq(&original, &clone));
+        assert!(match (original, clone) {
+            (Sexpr::Integer(l), Sexpr::Integer(r)) => l == r,
+            _ => false,
+        });
+
+        original = Sexpr::List(vec![
+            Sexpr::Symbol(String::from("+")),
+            Sexpr::Integer(1),
+            Sexpr::Integer(1),
+        ]);
+        clone = original.clone();
+        assert!(equal_object_lists(&original, &original));
+        assert!(!ptr::eq(&original, &clone));
+        assert!(!match (&original, &clone) {
+            (Sexpr::List(l), Sexpr::List(r)) => ptr::eq(&l, &r),
+            _ => false,
+        });
+        let vec_original = unpack_list(&original).unwrap();
+        let vec_clone = unpack_list(&clone).unwrap();
+        let comp = vec_original.iter().zip(vec_clone);
+        for (o, c) in comp {
+            assert_eq!(o, c);
+            assert!(!ptr::eq(&o, &c));
+        }
     }
 }
