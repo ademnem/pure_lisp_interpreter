@@ -22,12 +22,14 @@ fn space_separate_inputs(input: &str) -> Vec<String> {
     }
     outputs
 }
+/* idk if i want to keep this still, there is a test i need to re-enable if i decide to keep this
 fn remove_quotes(input: String) -> String {
     let mut chars = input.chars();
     chars.next();
     chars.next_back();
     chars.as_str().to_string()
 }
+*/
 fn tokenize_inputs(input: Vec<String>) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
 
@@ -41,7 +43,7 @@ fn tokenize_inputs(input: Vec<String>) -> Vec<Token> {
                     Ok(i) => tokens.push(Token::Integer(i)),
                     Err(_) => {
                         if part.starts_with("\"") && part.ends_with("\"") {
-                            tokens.push(Token::String(remove_quotes(part)));
+                            tokens.push(Token::String(part));
                         } else {
                             tokens.push(Token::Symbol(part));
                         }
@@ -145,6 +147,7 @@ mod tests {
         assert!(compare_token_vectors(result, expected));
     }
 
+    /*
     #[test]
     fn test_remove_quotes() {
         let mut input = String::from("\"hello\"");
@@ -155,6 +158,7 @@ mod tests {
         result = remove_quotes(input);
         assert_eq!(result, String::from("he\"llo"));
     }
+    */
 
     #[test]
     fn test_tokenize() {
@@ -194,7 +198,7 @@ mod tests {
 
         input = String::from("\"hello\"");
         result = tokenize(&input);
-        expected = vec![Token::String(String::from("hello"))];
+        expected = vec![Token::String(String::from("\"hello\""))];
         assert!(compare_token_vectors(result, expected));
     }
 }
