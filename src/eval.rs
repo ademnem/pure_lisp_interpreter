@@ -38,14 +38,7 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             // when something that is quoted is passed, evaluating it
             // makes it itself
             // evaluate quoted args before sendings
-            "QUOTE" => match args {
-                // the first argument in args is alist
-                Sexpr::List(l) => quote(match l.first() {
-                    Some(s) => s.clone(),
-                    None => return Err(String::from("quote: list is empty")),
-                }),
-                _ => quote(args), // lambda should also return itself right?
-            },
+            "QUOTE" => quote(args),
             _ => {
                 let eval_args = match evaluate(args.clone(), alist.clone()) {
                     Ok(o) => o,
@@ -67,10 +60,7 @@ fn apply(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     // create a copy of first sexpr
     let f = match &v {
         Sexpr::List(l) => match l.first() {
-            Some(s) => {
-                print_sexpr(&s);
-                s.clone()
-            }
+            Some(s) => s.clone(),
             None => return Err(String::from("apply: list is empty")),
         },
         _ => return Err(String::from("apply: val passed in was not a list")),

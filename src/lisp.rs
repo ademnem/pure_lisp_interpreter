@@ -4,7 +4,14 @@ use crate::parse::*;
 pub static OBLIST: Vec<(String, Sexpr)> = Vec::new();
 
 pub fn quote(args: Sexpr) -> Result<Sexpr, String> {
-    Ok(args)
+    match args {
+        // just return the first argument as is
+        Sexpr::List(l) => match l.first() {
+            Some(s) => Ok(s.clone()),
+            None => Err(String::from("quote: list is empty")),
+        },
+        _ => Err(String::from("quote: something went wrong")), // lambda should also return itself right?
+    }
 }
 pub fn car(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     match args {
@@ -45,15 +52,13 @@ mod tests {
 
     #[test]
     fn test_quote() {
-        let mut args: Sexpr = Sexpr::List(vec![Sexpr::String(String::from("a"))]);
-        assert!(equal_sexprs(&quote(args.clone()).unwrap(), &args));
+        let mut arg: Sexpr = Sexpr::String(String::from("a"));
+        let mut args: Sexpr = Sexpr::List(vec![arg.clone()]);
+        assert!(equal_sexprs(&quote(args.clone()).unwrap(), &arg));
 
-        // adding to the alist should have no effect
-        args = Sexpr::List(vec![Sexpr::Symbol(String::from("a"))]);
-        assert!(equal_sexprs(&quote(args.clone()).unwrap(), &args));
-
-        args = Sexpr::List(Vec::new());
-        assert!(equal_sexprs(&quote(args.clone()).unwrap(), &args));
+        arg = Sexpr::List(Vec::new());
+        args = Sexpr::List(vec![arg.clone()]);
+        assert!(equal_sexprs(&quote(args.clone()).unwrap(), &arg));
     }
 
     #[test]
