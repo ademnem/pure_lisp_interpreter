@@ -11,6 +11,33 @@ pub enum Sexpr {
     T,
     Nil,
 }
+pub fn sexpr_to_string(v: &Sexpr) -> String {
+    match v {
+        Sexpr::Integer(i) => i.to_string(),
+        Sexpr::String(s) => String::from(s),
+        Sexpr::Symbol(s) => String::from(s),
+        Sexpr::T => String::from("T"),
+        Sexpr::Nil => String::from("NIL"),
+        Sexpr::List(l) => {
+            let mut str: String = String::from("( ");
+            for sexpr in l {
+                str += sexpr_to_string(sexpr).as_str();
+                str += " ";
+            }
+            str += ")";
+            str
+        }
+        Sexpr::Lambda(_, v) => {
+            let mut str: String = String::from("( ");
+            for sexpr in v {
+                str += sexpr_to_string(sexpr).as_str();
+                str += " ";
+            }
+            str += ")";
+            str
+        }
+    }
+}
 
 fn parse_atom(token: &Token) -> Sexpr {
     match token {
@@ -30,7 +57,7 @@ fn is_list(tokens: &Vec<Token>) -> bool {
     }
 }
 fn parse_list(tokens: &mut Vec<Token>) -> Sexpr {
-    let _ = tokens.pop(); // remove first RParen
+    let _ = tokens.pop(); // remove first LParen
 
     let mut list: Vec<Sexpr> = Vec::new();
     /*
@@ -41,16 +68,14 @@ fn parse_list(tokens: &mut Vec<Token>) -> Sexpr {
 
     while !tokens.is_empty() {
         let token = tokens.pop();
-        if token.is_some() {
-            // rewrite using parse_atom
-            match token.unwrap() {
+        if let Some(token1) = token {
+            match token1.clone() {
                 Token::RParen => {
-                    list.push(parse_list(tokens));
-                    // what happens here?
-                    // it should stop
+                    return Sexpr::List(list);
                 }
                 Token::LParen => {
-                    return Sexpr::List(list);
+                    tokens.push(Token::LParen);
+                    list.push(parse_list(tokens));
                 }
                 t => {
                     list.push(parse_atom(&t));
@@ -75,6 +100,7 @@ pub fn parse(tokens: &mut Vec<Token>) -> Sexpr {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test::*;
     use std::ptr;
 
     #[test]
@@ -116,43 +142,6 @@ mod tests {
             _ => Err(""),
         }
     }
-    fn equal_object_lists(result: &Sexpr, expected: &Sexpr) -> bool {
-        let vec_result = unpack_list(&result).unwrap();
-
-        let vec_expected = unpack_list(&expected).unwrap();
-        let comp = vec_result.iter().zip(vec_expected);
-
-        for (r, e) in comp {
-            /* // when the test fails, this prints out
-            match r {
-                Sexpr::Symbol(_) => print!("s "),
-                Sexpr::Integer(_) => print!("i "),
-                Sexpr::List(_) => print!("l "),
-                _ => {},
-            }
-            match e {
-                Sexpr::Symbol(_) => println!("s"),
-                Sexpr::Integer(_) => println!("i"),
-                Sexpr::List(_) => println!("l"),
-                _ => {},
-            }
-            */
-            match r {
-                Sexpr::List(_) => {
-                    if !equal_object_lists(r, e) {
-                        return false;
-                    }
-                }
-                _ => {
-                    if r != e {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        true
-    }
 
     #[test]
     fn test_parse_list() {
@@ -161,7 +150,7 @@ mod tests {
         let mut result: Sexpr = parse_list(&mut input);
         let mut output: Vec<Sexpr> = Vec::new();
         let mut expected: Sexpr = Sexpr::List(output);
-        assert!(equal_object_lists(&result, &expected));
+        assert!(equal_sexprs(&result, &expected));
 
         input = vec![
             Token::LParen,
@@ -178,7 +167,7 @@ mod tests {
             Sexpr::Integer(1),
         ];
         expected = Sexpr::List(output);
-        assert!(equal_object_lists(&result, &expected));
+        assert!(equal_sexprs(&result, &expected));
 
         input = vec![
             Token::LParen,
@@ -199,7 +188,7 @@ mod tests {
             Sexpr::Integer(1),
         ];
         let expected2 = Sexpr::List(output2);
-        assert!(equal_object_lists(&result, &expected2));
+        assert!(equal_sexprs(&result, &expected2));
     }
 
     #[test]
@@ -216,7 +205,7 @@ mod tests {
         result = parse(&mut input);
         let mut output: Vec<Sexpr> = Vec::new();
         let mut expected: Sexpr = Sexpr::List(output);
-        assert!(equal_object_lists(&result, &expected));
+        assert!(equal_sexprs(&result, &expected));
 
         input = vec![
             Token::LParen,
@@ -232,7 +221,7 @@ mod tests {
             Sexpr::Integer(1),
         ];
         expected = Sexpr::List(output);
-        assert!(equal_object_lists(&result, &expected));
+        assert!(equal_sexprs(&result, &expected));
 
         input = vec![
             Token::LParen,
@@ -252,7 +241,7 @@ mod tests {
             Sexpr::Integer(1),
         ];
         let expected2 = Sexpr::List(output2);
-        assert!(equal_object_lists(&result, &expected2));
+        assert!(equal_sexprs(&result, &expected2));
     }
 
     #[test]
@@ -272,7 +261,7 @@ mod tests {
             Sexpr::Integer(1),
         ]);
         clone = original.clone();
-        assert!(equal_object_lists(&original, &original));
+        assert!(equal_sexprs(&original, &original));
         assert!(!ptr::eq(&original, &clone));
         assert!(!match (&original, &clone) {
             (Sexpr::List(l), Sexpr::List(r)) => ptr::eq(&l, &r),
