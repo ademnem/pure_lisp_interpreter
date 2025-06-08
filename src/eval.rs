@@ -110,18 +110,6 @@ pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
     }
 }
 
-// recursively creates a string for the sexpr
-pub fn sexpr_to_string(v: Sexpr) -> Result<String, String> {
-    match v {
-        Sexpr::Integer(i) => Ok(i.to_string()),
-        Sexpr::String(s) => Ok(s),
-        Sexpr::Symbol(s) => Ok(s),
-        Sexpr::T => Ok(String::from("T")),
-        Sexpr::Nil => Ok(String::from("NIL")),
-        _ => Err(String::from("should not get here")),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::test;

@@ -5,10 +5,10 @@ mod parse;
 mod shell;
 mod test;
 
-use crate::eval::*;
-use crate::lexer::*;
-use crate::parse::*;
+use eval::*;
+use lexer::*;
 use lisp::*;
+use parse::*;
 use shell::*;
 
 const EXIT: i8 = -1;
@@ -22,10 +22,7 @@ fn match_command(command: String) -> i8 {
             let mut tokens: Vec<Token> = tokenize(&command);
             let symbols: Sexpr = parse(&mut tokens);
             match evaluate(symbols, OBLIST.clone()) {
-                Ok(s) => match sexpr_to_string(s) {
-                    Ok(o) => println!("{}", o),
-                    Err(e) => println!("{}", e),
-                },
+                Ok(s) => println!("{}", sexpr_to_string(&s)),
                 Err(e) => println!("Error: {}", e),
             }
             println!("{}", command); // print here
