@@ -15,7 +15,7 @@ const EXIT: i8 = -1;
 const CONTINUE: i8 = 0;
 
 fn match_command(command: String) -> i8 {
-    match command.replace(" ", "").as_str() {
+    match command.replace(" ", "").to_ascii_uppercase().as_str() {
         "EXIT" => EXIT,
         "" => CONTINUE,
         _ => {
@@ -25,7 +25,6 @@ fn match_command(command: String) -> i8 {
                 Ok(s) => println!("{}", sexpr_to_string(&s)),
                 Err(e) => println!("Error: {}", e),
             }
-            println!("{}", command); // print here
             CONTINUE
         }
     }
