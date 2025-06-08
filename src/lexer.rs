@@ -1,10 +1,19 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Token {
     Integer(i64),
     String(String),
     Symbol(String),
     LParen,
     RParen,
+}
+pub fn token_to_string(v: &Token) -> String {
+    match v {
+        Token::Integer(i) => i.to_string(),
+        Token::String(s) => s.to_string(),
+        Token::Symbol(s) => s.to_string(),
+        Token::LParen => String::from("("),
+        Token::RParen => String::from(")"),
+    }
 }
 
 fn space_inputs(input: &String) -> String {
@@ -22,14 +31,7 @@ fn space_separate_inputs(input: &str) -> Vec<String> {
     }
     outputs
 }
-/* idk if i want to keep this still, there is a test i need to re-enable if i decide to keep this
-fn remove_quotes(input: String) -> String {
-    let mut chars = input.chars();
-    chars.next();
-    chars.next_back();
-    chars.as_str().to_string()
-}
-*/
+
 fn tokenize_inputs(input: Vec<String>) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
 
