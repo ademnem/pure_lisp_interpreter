@@ -149,19 +149,6 @@ mod tests {
         assert!(compare_token_vectors(result, expected));
     }
 
-    /*
-    #[test]
-    fn test_remove_quotes() {
-        let mut input = String::from("\"hello\"");
-        let mut result = remove_quotes(input);
-        assert_eq!(result, String::from("hello"));
-
-        input = String::from("\"he\"llo\"");
-        result = remove_quotes(input);
-        assert_eq!(result, String::from("he\"llo"));
-    }
-    */
-
     #[test]
     fn test_tokenize() {
         let mut input = String::from("(+)");
