@@ -17,18 +17,6 @@ pub fn equal_sexprs(l: &Sexpr, r: &Sexpr) -> bool {
     }
 }
 
-pub fn print_sexpr(s: &Sexpr) {
-    match s {
-        Sexpr::String(s) => println!("{}", s),
-        Sexpr::Integer(i) => println!("{}", i),
-        Sexpr::Symbol(s) => println!("{}", s),
-        Sexpr::List(_) => println!("list"),
-        Sexpr::T => println!("T"),
-        Sexpr::Nil => println!("NIL"),
-        Sexpr::Lambda(_, _) => println!("lambda"),
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
