@@ -39,18 +39,9 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             // makes it itself
             // evaluate quoted args before sendings
             "QUOTE" => quote(args),
-            _ => {
-                let eval_args = match evaluate(args.clone(), alist.clone()) {
-                    Ok(o) => o,
-                    Err(e) => return Err(e),
-                };
-                match s.as_str() {
-                    "CAR" => car(eval_args, alist.clone()),
-                    // "CDR" => cdr(),
-                    // "SETQ" => setq(args, alist.clone()),
-                    _ => Ok(Sexpr::Nil), // calls apply_lambda later
-                }
-            }
+            "CAR" => car(args, alist.clone()),
+            "CDR" => cdr(args, alist.clone()),
+            _ => Ok(Sexpr::Nil),
         },
         _ => Err(String::from("apply_atom: requires symbol as first arg")),
     }
@@ -68,8 +59,14 @@ fn apply(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
 
     // create copy of args
     let args = match &v {
-        Sexpr::List(l) => Sexpr::List(l[1..].to_vec()),
-        _ => return Err(String::from("apply: issue with args")),
+        Sexpr::List(l) => {
+            if l.len() >= 2 {
+                Sexpr::List(l[1..].to_vec())
+            } else {
+                return Err(String::from("apply: v len must be >= 2"));
+            }
+        }
+        _ => return Err(String::from("apply: v must be a list")),
     };
 
     match f {

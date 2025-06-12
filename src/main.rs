@@ -33,8 +33,6 @@ fn match_command(command: String) -> i8 {
 fn main() {
     pure_lisp_interpreter_message();
 
-    // save declare variables here
-    // how does rust borrowing work?
     loop {
         match get_command() {
             Ok(command) => {

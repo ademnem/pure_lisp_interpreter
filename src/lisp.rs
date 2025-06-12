@@ -14,22 +14,49 @@ pub fn quote(args: Sexpr) -> Result<Sexpr, String> {
     }
 }
 pub fn car(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
-    match args {
+    let mut arg = match &args {
         Sexpr::List(l) => match l.first() {
-            Some(s) => evaluate(s.clone(), alist.clone()),
+            Some(s) => s.clone(),
+            None => return Err(String::from("car: args list is empty")),
+        },
+        _ => return Err(String::from("car: args must be a list")),
+    };
+    arg = match evaluate(arg, alist.clone()) {
+        Ok(o) => o,
+        Err(e) => return Err(e),
+    };
+
+    match arg {
+        Sexpr::List(l) => match l.first() {
+            Some(s) => Ok(s.clone()),
             None => Err(String::from("car: list len must be >=1")),
         },
         _ => Err(String::from("car: arg must be list")),
     }
 }
 pub fn cdr(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
-    /*
-        match args {
-            Sexpr::List(l) => Ok(evaluate(l[1..].to_vec())),
-            _ => Err(String::from("car: arg must be list")),
+    let mut arg = match &args {
+        Sexpr::List(l) => match l.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("cdr: args list is empty")),
+        },
+        _ => return Err(String::from("cdr: args must be a list")),
+    };
+    arg = match evaluate(arg, alist.clone()) {
+        Ok(o) => o,
+        Err(e) => return Err(e),
+    };
+
+    match arg {
+        Sexpr::List(l) => {
+            if l.len() >= 1 {
+                Ok(Sexpr::List(l[1..].to_vec()))
+            } else {
+                return Err(String::from("cdr: arg must be length >= 1"));
+            }
         }
-    */
-    Ok(Sexpr::Nil)
+        _ => Err(String::from("cdr: arg must be list")),
+    }
 }
 pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let something = match args {
@@ -63,27 +90,39 @@ mod tests {
 
     #[test]
     fn test_car() {
-        let mut args: Sexpr = Sexpr::List(vec![Sexpr::String(String::from("a"))]);
-        let mut alist: Vec<(String, Sexpr)> = vec![];
-        assert_eq!(
-            car(args, alist.clone()).unwrap(),
-            Sexpr::String(String::from("a"))
-        );
+        let args: Sexpr = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Integer(1)]),
+        ])]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(car(args, alist.clone()), Ok(Sexpr::Integer(1)));
 
-        args = Sexpr::List(vec![Sexpr::Symbol(String::from("a"))]);
-        alist.push((String::from("a"), Sexpr::Integer(51)));
-        assert_eq!(car(args, alist.clone()).unwrap(), Sexpr::Integer(51));
-
-        args = Sexpr::List(Vec::new());
-        assert_eq!(
-            car(args, alist.clone()),
-            Err(String::from("car: list len must be >=1"))
-        );
-
-        args = Sexpr::Integer(51);
+        let args: Sexpr = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Symbol(String::from("X"))]),
+        ])]);
         assert_eq!(
             car(args, alist.clone()),
-            Err(String::from("car: arg must be list")),
+            Ok(Sexpr::Symbol(String::from("X")))
+        );
+    }
+
+    #[test]
+    fn test_cdr() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Integer(1)]),
+        ])]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(cdr(args, alist.clone()), Ok(Sexpr::List(Vec::new())));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]),
+        ])]);
+        assert_eq!(
+            cdr(args, alist.clone()),
+            Ok(Sexpr::List(vec![Sexpr::Integer(1)]))
         );
     }
 }
