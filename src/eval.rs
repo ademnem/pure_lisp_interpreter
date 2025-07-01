@@ -27,20 +27,14 @@ fn apply_lambda(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Se
     Ok(Sexpr::Nil)
 }
 fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
-    // only (quote (list)) is passed into certain functions
-    // and so args needs to be evaluated
-    // "all args are recursively evaluated" -prof klefstad
-
-    // only f
-
+    // args is a list containing the args of the function
+    // (arg1 arg2 ... argN)
     match f {
         Sexpr::Symbol(s) => match s.as_str() {
-            // when something that is quoted is passed, evaluating it
-            // makes it itself
-            // evaluate quoted args before sendings
             "QUOTE" => quote(args),
             "CAR" => car(args, alist.clone()),
             "CDR" => cdr(args, alist.clone()),
+            "SETQ" => setq(args, alist.clone()),
             _ => Ok(Sexpr::Nil),
         },
         _ => Err(String::from("apply_atom: requires symbol as first arg")),
@@ -89,7 +83,6 @@ fn eval_atom(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
     }
 }
 pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
-    // alist = activation record (or call stack)
     match v {
         Sexpr::List(_) => apply(v, alist.clone()),
         Sexpr::Lambda(_, _) => apply(v, alist.clone()),

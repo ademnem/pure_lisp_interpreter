@@ -1,7 +1,15 @@
 use crate::eval::*;
 use crate::parse::*;
 
-pub static OBLIST: Vec<(String, Sexpr)> = Vec::new();
+use once_cell::sync::Lazy;
+use std::sync::Mutex;
+
+pub static OBLIST: Lazy<Mutex<Vec<(String, Sexpr)>>> = Lazy::new(|| Mutex::new(Vec::new()));
+
+fn push_value(val: (String, Sexpr)) {
+    let mut vec = OBLIST.lock().unwrap();
+    vec.push(val);
+}
 
 pub fn quote(args: Sexpr) -> Result<Sexpr, String> {
     match args {
@@ -59,14 +67,32 @@ pub fn cdr(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     }
 }
 pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
-    let something = match args {
-        // needs at least two args
-        // only get the first two args
-        _ => return Err(String::from("setq requires 2 args")),
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("setq: args must be a list")),
     };
-    // var has to be a Symbol
-    // val has to be the evaluated value of
-    Ok(Sexpr::Nil)
+
+    let symbol: Sexpr = match args.first() {
+        Some(s) => s.clone(),
+        None => return Err(String::from("setq: no first arg")),
+    };
+    let value: Sexpr = match evaluate(
+        match args.get(1) {
+            Some(s) => s.clone(),
+            None => return Err(String::from("setq: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    match symbol {
+        Sexpr::Symbol(s) => OBLIST.lock().unwrap().push((s, value.clone())),
+        _ => return Err(String::from("first arg must be a symbol")),
+    }
+
+    Ok(value)
 }
 
 // fn eval_cond(clauses alist)
@@ -124,5 +150,14 @@ mod tests {
             cdr(args, alist.clone()),
             Ok(Sexpr::List(vec![Sexpr::Integer(1)]))
         );
+    }
+
+    #[test]
+    fn test_setq() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(setq(args, alist), Ok(Sexpr::Integer(1)));
+        // test for OBLIST change through cargo run
+        // i can put this in the test_evaluate function in eval.rs later if needed
     }
 }

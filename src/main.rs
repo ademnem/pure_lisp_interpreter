@@ -21,7 +21,8 @@ fn match_command(command: String) -> i8 {
         _ => {
             let mut tokens: Vec<Token> = tokenize(&command);
             let symbols: Sexpr = parse(&mut tokens);
-            match evaluate(symbols, OBLIST.clone()) {
+            let alist = OBLIST.lock().unwrap().clone();
+            match evaluate(symbols, alist) {
                 Ok(s) => println!("{}", sexpr_to_string(&s)),
                 Err(e) => println!("Error: {}", e),
             }
