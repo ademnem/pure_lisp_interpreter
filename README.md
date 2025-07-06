@@ -6,7 +6,7 @@ Pure Lisp interpreter in Rust
 [] add eval   
 [] figure out how to do lambdas 
 
-**_Functions_** 
+**_Functions_**  
 [] eq  
 [X] car  
 [X] cdr  
