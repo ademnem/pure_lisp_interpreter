@@ -11,10 +11,10 @@ Pure Lisp interpreter in Rust
 [X] car  
 [X] cdr  
 [X] setq  
-[ ] eq  
+[ ] eq (working on it)
 [ ] cons  
 [ ] cond  
-[ ] defun  
+[ ] defun (what happens if a param is nil?) 
 [ ] eval  
 [ ] print  
 [ ] null  
@@ -22,7 +22,7 @@ Pure Lisp interpreter in Rust
 [ ] listp  
 [ ] apply  
 [ ] equal  
-[ ] +  
-[ ] -  
+[ ] + / add
+[ ] - / sub
 [ ] mod  
 [ ] floor
