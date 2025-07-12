@@ -6,11 +6,6 @@ use std::sync::Mutex;
 
 pub static OBLIST: Lazy<Mutex<Vec<(String, Sexpr)>>> = Lazy::new(|| Mutex::new(Vec::new()));
 
-fn push_value(val: (String, Sexpr)) {
-    let mut vec = OBLIST.lock().unwrap();
-    vec.push(val);
-}
-
 pub fn quote(args: Sexpr) -> Result<Sexpr, String> {
     match args {
         // just return the first argument as is
@@ -88,7 +83,13 @@ pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     };
 
     match symbol {
-        Sexpr::Symbol(s) => OBLIST.lock().unwrap().push((s, value.clone())),
+        Sexpr::Symbol(s) => {
+            if s == String::from("NIL") {
+                return Err(String::from("NIL is not a valid symbol name"));
+            } else {
+                OBLIST.lock().unwrap().push((s, value.clone()))
+            }
+        }
         _ => return Err(String::from("first arg must be a symbol")),
     }
 
