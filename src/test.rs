@@ -9,7 +9,6 @@ pub fn equal_sexpr_lists(l: &Vec<Sexpr>, r: &Vec<Sexpr>) -> bool {
     }
     true
 }
-
 pub fn equal_sexprs(l: &Sexpr, r: &Sexpr) -> bool {
     match (l, r) {
         (Sexpr::List(a), Sexpr::List(b)) => equal_sexpr_lists(&a, &b),

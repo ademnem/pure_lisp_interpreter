@@ -11,7 +11,7 @@ Pure Lisp interpreter in Rust
 [X] car  
 [X] cdr  
 [X] setq  
-[ ] eq (working on it)
+[X] eq
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 

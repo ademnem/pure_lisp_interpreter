@@ -1,5 +1,6 @@
 use crate::eval::*;
 use crate::parse::*;
+use crate::test::*;
 
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
@@ -95,6 +96,39 @@ pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
 
     Ok(value)
 }
+pub fn eq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("setq: args must be a list")),
+    };
+
+    let left: Sexpr = match evaluate(
+        match args.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("setq: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+    let right: Sexpr = match evaluate(
+        match args.get(1) {
+            Some(s) => s.clone(),
+            None => return Err(String::from("setq: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    if equal_sexprs(&left, &right) {
+        Ok(Sexpr::T)
+    } else {
+        Ok(Sexpr::Nil)
+    }
+}
 
 // fn eval_cond(clauses alist)
 // fn eval_defun(body alist)
@@ -102,7 +136,6 @@ pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::*;
 
     #[test]
     fn test_quote() {
@@ -157,8 +190,25 @@ mod tests {
     fn test_setq() {
         let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]);
         let alist: Vec<(String, Sexpr)> = Vec::new();
-        assert_eq!(setq(args, alist), Ok(Sexpr::Integer(1)));
+        assert_eq!(setq(args, alist.clone()), Ok(Sexpr::Integer(1)));
+        let v: Sexpr = Sexpr::Symbol(String::from("X"));
+        let alist = OBLIST.lock().unwrap().clone();
+        assert_eq!(evaluate(v, alist.clone()), Ok(Sexpr::Integer(1)));
         // test for OBLIST change through cargo run
         // i can put this in the test_evaluate function in eval.rs later if needed
+    }
+
+    #[test]
+    fn test_eq() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(eq(args, alist), Ok(Sexpr::T));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(setq(args, alist.clone()), Ok(Sexpr::Integer(1)));
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Symbol(String::from("X"))]);
+        let alist = OBLIST.lock().unwrap().clone();
+        assert_eq!(eq(args, alist), Ok(Sexpr::T));
     }
 }
