@@ -79,12 +79,19 @@ fn eval_list(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
 fn eval_atom(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
     match v {
         Sexpr::Symbol(s) => assoc(s, alist),
+        // if string is nil then return nil
         _ => v, // integers, T and NIL return themselves
     }
 }
 pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
-    match v {
-        Sexpr::List(_) => apply(v, alist.clone()),
+    match &v {
+        Sexpr::List(l) => {
+            if l.is_empty() {
+                Ok(Sexpr::Nil)
+            } else {
+                apply(v, alist.clone())
+            }
+        }
         Sexpr::Lambda(_, _) => apply(v, alist.clone()),
         _ => Ok(eval_atom(v, alist.clone())),
     }
@@ -147,6 +154,12 @@ mod tests {
         assert!(equal_sexprs(
             &evaluate(v.clone(), alist.clone()).unwrap(),
             &args
+        ));
+
+        let v: Sexpr = Sexpr::List(Vec::new());
+        assert!(equal_sexprs(
+            &evaluate(v.clone(), alist.clone()).unwrap(),
+            &Sexpr::Nil
         ));
     }
 
