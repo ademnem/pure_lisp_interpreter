@@ -78,8 +78,13 @@ fn eval_list(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
 
 fn eval_atom(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
     match v {
-        Sexpr::Symbol(s) => assoc(s, alist),
-        // if string is nil then return nil
+        Sexpr::Symbol(s) => {
+            if s == String::from("NIL") {
+                Sexpr::Nil
+            } else {
+                assoc(s, alist)
+            }
+        }
         _ => v, // integers, T and NIL return themselves
     }
 }
