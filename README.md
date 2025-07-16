@@ -12,14 +12,14 @@ Pure Lisp interpreter in Rust
 [X] cdr  
 [X] setq  
 [X] eq
+[X] atom  
+[ ] listp  
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
 [ ] eval  
 [ ] print  
 [ ] null  
-[ ] atom  
-[ ] listp  
 [ ] apply  
 [ ] equal  
 [ ] + / add
