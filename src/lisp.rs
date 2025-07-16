@@ -17,6 +17,7 @@ pub fn quote(args: Sexpr) -> Result<Sexpr, String> {
         _ => Err(String::from("quote: something went wrong")), // lambda should also return itself right?
     }
 }
+
 pub fn car(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let mut arg = match &args {
         Sexpr::List(l) => match l.first() {
@@ -38,6 +39,7 @@ pub fn car(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
         _ => Err(String::from("car: arg must be list")),
     }
 }
+
 pub fn cdr(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let mut arg = match &args {
         Sexpr::List(l) => match l.first() {
@@ -62,6 +64,7 @@ pub fn cdr(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
         _ => Err(String::from("cdr: arg must be list")),
     }
 }
+
 pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let args: Vec<Sexpr> = match &args {
         Sexpr::List(l) => l.clone(),
@@ -96,16 +99,17 @@ pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
 
     Ok(value)
 }
+
 pub fn eq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let args: Vec<Sexpr> = match &args {
         Sexpr::List(l) => l.clone(),
-        _ => return Err(String::from("setq: args must be a list")),
+        _ => return Err(String::from("eq: args must be a list")),
     };
 
     let left: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("setq: no second arg")),
+            None => return Err(String::from("eq: no second arg")),
         },
         alist.clone(),
     ) {
@@ -115,7 +119,7 @@ pub fn eq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let right: Sexpr = match evaluate(
         match args.get(1) {
             Some(s) => s.clone(),
-            None => return Err(String::from("setq: no second arg")),
+            None => return Err(String::from("eq: no second arg")),
         },
         alist.clone(),
     ) {
