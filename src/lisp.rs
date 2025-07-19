@@ -153,6 +153,25 @@ pub fn atom(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     }
 }
 
+pub fn listp(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let mut arg = match &args {
+        Sexpr::List(l) => match l.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("listp: args list is empty")),
+        },
+        _ => return Err(String::from("listp: args must be a list")),
+    };
+    arg = match evaluate(arg, alist.clone()) {
+        Ok(o) => o,
+        Err(e) => return Err(e),
+    };
+
+    match arg {
+        Sexpr::List(_) => Ok(Sexpr::T),
+        Sexpr::Nil => Ok(Sexpr::T),
+        _ => Ok(Sexpr::Nil),
+    }
+}
 // fn eval_cond(clauses alist)
 // fn eval_defun(body alist)
 
@@ -254,5 +273,30 @@ mod tests {
         ])]);
         let alist = Vec::new();
         assert_eq!(atom(args, alist), Ok(Sexpr::Nil));
+    }
+
+    #[test]
+    fn test_listp() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(listp(args, alist), Ok(Sexpr::Nil));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(setq(args, alist.clone()), Ok(Sexpr::Integer(1)));
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X"))]);
+        let alist = OBLIST.lock().unwrap().clone();
+        assert_eq!(listp(args, alist), Ok(Sexpr::Nil));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]),
+        ])]);
+        let alist = Vec::new();
+        assert_eq!(listp(args, alist), Ok(Sexpr::T));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Nil]);
+        let alist = Vec::new();
+        assert_eq!(listp(args, alist), Ok(Sexpr::T));
     }
 }

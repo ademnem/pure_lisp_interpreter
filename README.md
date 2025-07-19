@@ -13,7 +13,9 @@ Pure Lisp interpreter in Rust
 [X] setq  
 [X] eq
 [X] atom  
-[ ] listp  
+[X] listp  
+[ ] + / add
+[ ] - / sub
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
@@ -22,7 +24,5 @@ Pure Lisp interpreter in Rust
 [ ] null  
 [ ] apply  
 [ ] equal  
-[ ] + / add
-[ ] - / sub
 [ ] mod  
 [ ] floor

@@ -37,6 +37,7 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             "SETQ" => setq(args, alist.clone()),
             "EQ" => eq(args, alist.clone()),
             "ATOM" => atom(args, alist.clone()),
+            "LISTP" => listp(args, alist.clone()),
             _ => Ok(Sexpr::Nil),
         },
         _ => Err(String::from("apply_atom: requires symbol as first arg")),
