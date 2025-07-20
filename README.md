@@ -12,11 +12,14 @@ Pure Lisp interpreter in Rust
 [X] car  
 [X] cdr  
 [X] setq  
-[X] eq
+[X] eq (address equality / literal equality)
 [X] atom  
 [X] listp  
+[X] floor
 [ ] + / add
 [ ] - / sub
+[ ] equal (structural equality)
+[ ] mod  
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
@@ -24,6 +27,3 @@ Pure Lisp interpreter in Rust
 [ ] print  
 [ ] null  
 [ ] apply  
-[ ] equal  
-[ ] mod  
-[ ] floor

@@ -172,6 +172,27 @@ pub fn listp(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
         _ => Ok(Sexpr::Nil),
     }
 }
+
+pub fn floor(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let mut arg = match &args {
+        Sexpr::List(l) => match l.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("floor: args list is empty")),
+        },
+        _ => return Err(String::from("floor: args must be a list")),
+    };
+    arg = match evaluate(arg, alist.clone()) {
+        Ok(o) => o,
+        Err(e) => return Err(e),
+    };
+
+    match arg {
+        Sexpr::Integer(i) => Ok(Sexpr::Integer(i)),
+        Sexpr::Float(f) => Ok(Sexpr::Integer(f as i64)),
+        _ => Err(String::from("floor: arg must be a int or float")),
+    }
+}
+
 // fn eval_cond(clauses alist)
 // fn eval_defun(body alist)
 
@@ -298,5 +319,23 @@ mod tests {
         let args: Sexpr = Sexpr::List(vec![Sexpr::Nil]);
         let alist = Vec::new();
         assert_eq!(listp(args, alist), Ok(Sexpr::T));
+    }
+
+    #[test]
+    fn test_floor() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(floor(args, alist), Ok(Sexpr::Integer(1)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(1.1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(floor(args, alist), Ok(Sexpr::Integer(1)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Float(6.7)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(setq(args, alist.clone()), Ok(Sexpr::Float(6.7)));
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X"))]);
+        let alist = OBLIST.lock().unwrap().clone();
+        assert_eq!(floor(args, alist), Ok(Sexpr::Integer(6)));
     }
 }
