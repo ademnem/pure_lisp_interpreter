@@ -1,6 +1,7 @@
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     Integer(i64),
+    Float(f64),
     String(String),
     Symbol(String),
     LParen,
@@ -10,6 +11,7 @@ pub enum Token {
 pub fn token_to_string(v: &Token) -> String {
     match v {
         Token::Integer(i) => i.to_string(),
+        Token::Float(f) => f.to_string(),
         Token::String(s) => s.to_string(),
         Token::Symbol(s) => s.to_string(),
         Token::LParen => String::from("("),
@@ -46,11 +48,15 @@ fn tokenize_inputs(input: Vec<String>) -> Vec<Token> {
                     Ok(i) => tokens.push(Token::Integer(i)),
                     Err(_) => {
                         // add the double parser here
-
-                        if part.starts_with("\"") && part.ends_with("\"") {
-                            tokens.push(Token::String(part));
-                        } else {
-                            tokens.push(Token::Symbol(part));
+                        match part.trim().parse::<f64>() {
+                            Ok(f) => tokens.push(Token::Float(f)),
+                            Err(_) => {
+                                if part.starts_with("\"") && part.ends_with("\"") {
+                                    tokens.push(Token::String(part));
+                                } else {
+                                    tokens.push(Token::Symbol(part));
+                                }
+                            }
                         }
                     }
                 }
@@ -149,6 +155,16 @@ mod tests {
         input = Vec::new();
         result = tokenize_inputs(input);
         expected = Vec::new();
+        assert!(compare_token_vectors(result, expected));
+
+        input = vec![String::from("1")];
+        result = tokenize_inputs(input);
+        expected = vec![Token::Integer(1)];
+        assert!(compare_token_vectors(result, expected));
+
+        input = vec![String::from("1.1")];
+        result = tokenize_inputs(input);
+        expected = vec![Token::Float(1.1)];
         assert!(compare_token_vectors(result, expected));
     }
 

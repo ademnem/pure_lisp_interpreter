@@ -4,6 +4,7 @@ use crate::lexer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub enum Sexpr {
     Integer(i64),
+    Float(f64),
     String(String),
     Symbol(String),
     List(Vec<Sexpr>),
@@ -14,6 +15,7 @@ pub enum Sexpr {
 pub fn sexpr_to_string(v: &Sexpr) -> String {
     match v {
         Sexpr::Integer(i) => i.to_string(),
+        Sexpr::Float(f) => f.to_string(),
         Sexpr::String(s) => String::from(s),
         Sexpr::Symbol(s) => String::from(s),
         Sexpr::T => String::from("T"),
@@ -42,6 +44,7 @@ pub fn sexpr_to_string(v: &Sexpr) -> String {
 fn parse_atom(token: &Token) -> Sexpr {
     match token {
         Token::Integer(i) => Sexpr::Integer(*i),
+        Token::Float(f) => Sexpr::Float(*f),
         Token::String(s) => Sexpr::String(s.clone()),
         Token::Symbol(s) => match s.as_str() {
             "T" => Sexpr::T,
@@ -115,6 +118,10 @@ mod tests {
 
         input = Token::Symbol(String::from("T"));
         expected = Sexpr::T;
+        assert_eq!(parse_atom(&input), expected);
+
+        input = Token::Float(1.1);
+        expected = Sexpr::Float(1.1);
         assert_eq!(parse_atom(&input), expected);
     }
 
