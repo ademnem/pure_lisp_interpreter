@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     Integer(i64),
     String(String),
@@ -6,6 +6,7 @@ pub enum Token {
     LParen,
     RParen,
 }
+#[allow(dead_code)] // should i allow this? it's useful for testing
 pub fn token_to_string(v: &Token) -> String {
     match v {
         Token::Integer(i) => i.to_string(),
@@ -40,10 +41,12 @@ fn tokenize_inputs(input: Vec<String>) -> Vec<Token> {
             "(" => tokens.push(Token::LParen),
             ")" => tokens.push(Token::RParen),
             _ => {
-                let atom: Result<i64, _> = part.trim().parse();
+                let atom: Result<i64, _> = part.trim().parse(); // int parser
                 match atom {
                     Ok(i) => tokens.push(Token::Integer(i)),
                     Err(_) => {
+                        // add the double parser here
+
                         if part.starts_with("\"") && part.ends_with("\"") {
                             tokens.push(Token::String(part));
                         } else {

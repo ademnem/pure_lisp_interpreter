@@ -1,7 +1,7 @@
 use crate::lexer::*;
 
 // clone makes a deep copy of Sexpr
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Sexpr {
     Integer(i64),
     String(String),
