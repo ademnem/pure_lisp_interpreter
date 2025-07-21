@@ -20,7 +20,7 @@ Pure Lisp interpreter in Rust
 [X] - (subtract)
 [X] * (mulitply)
 [X] / (divide)
-[ ] mod  
+[X] mod  
 [ ] eq (address equality / literal equality)
 [ ] cons  
 [ ] cond  
