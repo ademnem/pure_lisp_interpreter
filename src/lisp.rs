@@ -100,16 +100,16 @@ pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     Ok(value)
 }
 
-pub fn eq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+pub fn equal(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let args: Vec<Sexpr> = match &args {
         Sexpr::List(l) => l.clone(),
-        _ => return Err(String::from("eq: args must be a list")),
+        _ => return Err(String::from("equal: args must be a list")),
     };
 
     let left: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("eq: no second arg")),
+            None => return Err(String::from("equal: no second arg")),
         },
         alist.clone(),
     ) {
@@ -119,7 +119,7 @@ pub fn eq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let right: Sexpr = match evaluate(
         match args.get(1) {
             Some(s) => s.clone(),
-            None => return Err(String::from("eq: no second arg")),
+            None => return Err(String::from("equal: no second arg")),
         },
         alist.clone(),
     ) {
@@ -262,17 +262,17 @@ mod tests {
     }
 
     #[test]
-    fn test_eq() {
+    fn test_equal() {
         let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
         let alist: Vec<(String, Sexpr)> = Vec::new();
-        assert_eq!(eq(args, alist), Ok(Sexpr::T));
+        assert_eq!(equal(args, alist), Ok(Sexpr::T));
 
         let args: Sexpr = Sexpr::List(vec![Sexpr::Symbol(String::from("X")), Sexpr::Integer(1)]);
         let alist: Vec<(String, Sexpr)> = Vec::new();
         assert_eq!(setq(args, alist.clone()), Ok(Sexpr::Integer(1)));
         let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Symbol(String::from("X"))]);
         let alist = OBLIST.lock().unwrap().clone();
-        assert_eq!(eq(args, alist), Ok(Sexpr::T));
+        assert_eq!(equal(args, alist), Ok(Sexpr::T));
     }
 
     #[test]
