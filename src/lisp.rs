@@ -196,13 +196,13 @@ pub fn floor(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
 pub fn add(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let args: Vec<Sexpr> = match &args {
         Sexpr::List(l) => l.clone(),
-        _ => return Err(String::from("equal: args must be a list")),
+        _ => return Err(String::from("add: args must be a list")),
     };
 
     let num1: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("equal: no second arg")),
+            None => return Err(String::from("add: no second arg")),
         },
         alist.clone(),
     ) {
@@ -212,7 +212,7 @@ pub fn add(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let num2: Sexpr = match evaluate(
         match args.get(1) {
             Some(s) => s.clone(),
-            None => return Err(String::from("equal: no second arg")),
+            None => return Err(String::from("add: no second arg")),
         },
         alist.clone(),
     ) {
@@ -232,13 +232,13 @@ pub fn add(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
 pub fn subtract(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let args: Vec<Sexpr> = match &args {
         Sexpr::List(l) => l.clone(),
-        _ => return Err(String::from("equal: args must be a list")),
+        _ => return Err(String::from("subtract: args must be a list")),
     };
 
     let num1: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("equal: no second arg")),
+            None => return Err(String::from("subtract: no second arg")),
         },
         alist.clone(),
     ) {
@@ -248,7 +248,7 @@ pub fn subtract(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, Strin
     let num2: Sexpr = match evaluate(
         match args.get(1) {
             Some(s) => s.clone(),
-            None => return Err(String::from("equal: no second arg")),
+            None => return Err(String::from("subtract: no second arg")),
         },
         alist.clone(),
     ) {
@@ -261,7 +261,79 @@ pub fn subtract(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, Strin
         (Sexpr::Float(f), Sexpr::Integer(i)) => Ok(Sexpr::Float(f - i as f64)),
         (Sexpr::Integer(i), Sexpr::Float(f)) => Ok(Sexpr::Float(f - i as f64)),
         (Sexpr::Float(f1), Sexpr::Float(f2)) => Ok(Sexpr::Float(f1 - f2)),
-        (_, _) => Err(String::from("add: both args must be nums")),
+        (_, _) => Err(String::from("subtract: both args must be nums")),
+    }
+}
+
+pub fn multiply(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("multiply: args must be a list")),
+    };
+
+    let num1: Sexpr = match evaluate(
+        match args.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("multiply: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+    let num2: Sexpr = match evaluate(
+        match args.get(1) {
+            Some(s) => s.clone(),
+            None => return Err(String::from("multiply: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    match (num1, num2) {
+        (Sexpr::Integer(i1), Sexpr::Integer(i2)) => Ok(Sexpr::Integer(i1 * i2)),
+        (Sexpr::Float(f), Sexpr::Integer(i)) => Ok(Sexpr::Float(f * i as f64)),
+        (Sexpr::Integer(i), Sexpr::Float(f)) => Ok(Sexpr::Float(f * i as f64)),
+        (Sexpr::Float(f1), Sexpr::Float(f2)) => Ok(Sexpr::Float(f1 * f2)),
+        (_, _) => Err(String::from("multiply: both args must be nums")),
+    }
+}
+
+pub fn divide(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("divide: args must be a list")),
+    };
+
+    let num1: Sexpr = match evaluate(
+        match args.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("divide: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+    let num2: Sexpr = match evaluate(
+        match args.get(1) {
+            Some(s) => s.clone(),
+            None => return Err(String::from("divide: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    match (num1, num2) {
+        (Sexpr::Integer(i1), Sexpr::Integer(i2)) => Ok(Sexpr::Integer(i1 / i2)),
+        (Sexpr::Float(f), Sexpr::Integer(i)) => Ok(Sexpr::Float(f / i as f64)),
+        (Sexpr::Integer(i), Sexpr::Float(f)) => Ok(Sexpr::Float(f / i as f64)),
+        (Sexpr::Float(f1), Sexpr::Float(f2)) => Ok(Sexpr::Float(f1 / f2)),
+        (_, _) => Err(String::from("divide: both args must be nums")),
     }
 }
 // fn eval_cond(clauses alist)
@@ -438,5 +510,35 @@ mod tests {
         let args: Sexpr = Sexpr::List(vec![Sexpr::Float(1.1), Sexpr::Float(1.1)]);
         let alist: Vec<(String, Sexpr)> = Vec::new();
         assert_eq!(subtract(args, alist), Ok(Sexpr::Float(0.0)));
+    }
+
+    #[test]
+    fn test_multiply() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(multiply(args, alist), Ok(Sexpr::Integer(1)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(100.0), Sexpr::Integer(2)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(multiply(args, alist), Ok(Sexpr::Float(200.0)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(10.0), Sexpr::Float(1.1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(multiply(args, alist), Ok(Sexpr::Float(11.0)));
+    }
+
+    #[test]
+    fn test_divide() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(divide(args, alist), Ok(Sexpr::Integer(1)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(100.0), Sexpr::Integer(2)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(divide(args, alist), Ok(Sexpr::Float(50.0)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(10.0), Sexpr::Float(2.0)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(divide(args, alist), Ok(Sexpr::Float(5.0)));
     }
 }

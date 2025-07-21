@@ -16,8 +16,10 @@ Pure Lisp interpreter in Rust
 [X] atom  
 [X] listp  
 [X] floor
-[X] + / add
-[ ] - / sub
+[X] + (add) 
+[X] - (subtract)
+[X] * (mulitply)
+[X] / (divide)
 [ ] mod  
 [ ] eq (address equality / literal equality)
 [ ] cons  
