@@ -229,6 +229,41 @@ pub fn add(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     }
 }
 
+pub fn subtract(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("equal: args must be a list")),
+    };
+
+    let num1: Sexpr = match evaluate(
+        match args.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("equal: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+    let num2: Sexpr = match evaluate(
+        match args.get(1) {
+            Some(s) => s.clone(),
+            None => return Err(String::from("equal: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    match (num1, num2) {
+        (Sexpr::Integer(i1), Sexpr::Integer(i2)) => Ok(Sexpr::Integer(i1 - i2)),
+        (Sexpr::Float(f), Sexpr::Integer(i)) => Ok(Sexpr::Float(f - i as f64)),
+        (Sexpr::Integer(i), Sexpr::Float(f)) => Ok(Sexpr::Float(f - i as f64)),
+        (Sexpr::Float(f1), Sexpr::Float(f2)) => Ok(Sexpr::Float(f1 - f2)),
+        (_, _) => Err(String::from("add: both args must be nums")),
+    }
+}
 // fn eval_cond(clauses alist)
 // fn eval_defun(body alist)
 
@@ -388,5 +423,20 @@ mod tests {
         let args: Sexpr = Sexpr::List(vec![Sexpr::Float(1.1), Sexpr::Float(1.1)]);
         let alist: Vec<(String, Sexpr)> = Vec::new();
         assert_eq!(add(args, alist), Ok(Sexpr::Float(2.2)));
+    }
+
+    #[test]
+    fn test_subtract() {
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(subtract(args, alist), Ok(Sexpr::Integer(0)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(100.0), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(subtract(args, alist), Ok(Sexpr::Float(99.0)));
+
+        let args: Sexpr = Sexpr::List(vec![Sexpr::Float(1.1), Sexpr::Float(1.1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(subtract(args, alist), Ok(Sexpr::Float(0.0)));
     }
 }
