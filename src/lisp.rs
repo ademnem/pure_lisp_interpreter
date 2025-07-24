@@ -372,6 +372,27 @@ pub fn modulo(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String>
         (_, _) => Err(String::from("modulo: both args must be nums")),
     }
 }
+
+pub fn print(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("divide: args must be a list")),
+    };
+
+    let arg: Sexpr = match evaluate(
+        match args.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("divide: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    print!("{}", sexpr_to_string(&arg));
+    Ok(Sexpr::String(String::new()))
+}
 // fn eval_cond(clauses alist)
 // fn eval_defun(body alist)
 

@@ -21,11 +21,11 @@ Pure Lisp interpreter in Rust
 [X] * (mulitply)
 [X] / (divide)
 [X] mod  
-[ ] eq (address equality / literal equality)
+[X] print  
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
 [ ] eval  
-[ ] print  
 [ ] null  
 [ ] apply  
+[ ] eq (address equality / literal equality) (requires string interning)
