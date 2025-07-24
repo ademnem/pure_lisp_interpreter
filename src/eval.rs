@@ -38,6 +38,7 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             "EQUAL" => equal(args, alist.clone()),
             "ATOM" => atom(args, alist.clone()),
             "LISTP" => listp(args, alist.clone()),
+            "NULL" => null(args, alist.clone()),
             "FLOOR" => floor(args, alist.clone()),
             "+" => add(args, alist.clone()),
             "-" => subtract(args, alist.clone()),

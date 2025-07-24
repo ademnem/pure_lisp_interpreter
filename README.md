@@ -15,6 +15,7 @@ Pure Lisp interpreter in Rust
 [X] equal (structural equality)
 [X] atom  
 [X] listp  
+[X] null  
 [X] floor
 [X] + (add) 
 [X] - (subtract)
@@ -26,6 +27,5 @@ Pure Lisp interpreter in Rust
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
 [ ] eval  
-[ ] null  
 [ ] apply  
 [ ] eq (address equality / literal equality) (requires string interning)
