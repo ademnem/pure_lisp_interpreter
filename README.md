@@ -3,8 +3,8 @@ Pure Lisp interpreter in Rust
 
 ## Todo (in any order)
 [X] add doubles
-[ ] fix sexpr_to_string for proper lists
-[ ] add sexpr_to_string tests
+[X] fix sexpr_to_string for proper lists
+[X] add sexpr_to_string tests
 [ ] add tests for proper lists
 [ ] figure out how to do lambdas 
 

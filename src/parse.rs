@@ -22,12 +22,32 @@ pub fn sexpr_to_string(v: &Sexpr) -> String {
         Sexpr::Nil => String::from("NIL"),
         Sexpr::List(l) => {
             let mut str: String = String::from("(");
-            for sexpr in &l[0..l.len() - 1] {
-                str += sexpr_to_string(sexpr).as_str();
-                str += " ";
+
+            if l.len() < 2 {
+                for sexpr in &l[0..l.len() - 1] {
+                    str += sexpr_to_string(sexpr).as_str();
+                    str += " ";
+                }
+                let last = &l[l.len() - 1];
+                if last != &Sexpr::Nil {
+                    str += " . ";
+                    str += sexpr_to_string(last).as_str();
+                }
+                str += ")";
+            } else {
+                // you can't have a list with only a non nil
+                for sexpr in &l[0..l.len() - 2] {
+                    str += sexpr_to_string(sexpr).as_str();
+                    str += " ";
+                }
+                str += sexpr_to_string(&l[l.len() - 2]).as_str();
+                let last = &l[l.len() - 1];
+                if last != &Sexpr::Nil {
+                    str += " . ";
+                    str += sexpr_to_string(last).as_str();
+                }
+                str += ")";
             }
-            str += sexpr_to_string(&l[l.len() - 1]).as_str();
-            str += ")";
             str
         }
         Sexpr::Lambda(name, body) => {
@@ -111,6 +131,21 @@ mod tests {
     use super::*;
     use crate::test::*;
     use std::ptr;
+
+    #[test]
+    fn test_sexpr_to_string() {
+        let input: Sexpr = Sexpr::List(vec![Sexpr::Nil]);
+        let expected: String = String::from("()");
+        assert_eq!(sexpr_to_string(&input), expected);
+
+        let input: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1), Sexpr::Nil]);
+        let expected: String = String::from("(1 1)");
+        assert_eq!(sexpr_to_string(&input), expected);
+
+        let input: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        let expected: String = String::from("(1 . 1)");
+        assert_eq!(sexpr_to_string(&input), expected);
+    }
 
     #[test]
     fn test_parse_atom() {
