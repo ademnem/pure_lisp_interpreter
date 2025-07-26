@@ -3,8 +3,9 @@ Pure Lisp interpreter in Rust
 
 ## Todo (in any order)
 [X] add doubles
-[ ] integrate other easy function (i get that this is really vague)   
-[ ] add eval   
+[ ] fix sexpr_to_string for proper lists
+[ ] add sexpr_to_string tests
+[ ] add tests for proper lists
 [ ] figure out how to do lambdas 
 
 **_Functions_**  
@@ -23,9 +24,8 @@ Pure Lisp interpreter in Rust
 [X] / (divide)
 [X] mod  
 [X] print  
+[ ] eval  
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
-[ ] eval  
-[ ] apply  
 [ ] eq (address equality / literal equality) (requires string interning)

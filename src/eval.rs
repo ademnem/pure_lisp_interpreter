@@ -88,13 +88,7 @@ fn eval_list(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
 }
 fn eval_atom(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
     match v {
-        Sexpr::Symbol(s) => {
-            if s == String::from("NIL") {
-                Sexpr::Nil
-            } else {
-                assoc(s, alist)
-            }
-        }
+        Sexpr::Symbol(s) => assoc(s, alist),
         _ => v, // integers, T and NIL return themselves
     }
 }
@@ -102,6 +96,8 @@ pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
     match &v {
         Sexpr::List(l) => {
             if l.is_empty() {
+                Ok(Sexpr::Nil)
+            } else if l.first() == Some(&Sexpr::Nil) {
                 Ok(Sexpr::Nil)
             } else {
                 apply(v, alist.clone())
@@ -171,7 +167,13 @@ mod tests {
             &args
         ));
 
+        // () == NIL tests
         let v: Sexpr = Sexpr::List(Vec::new());
+        assert!(equal_sexprs(
+            &evaluate(v.clone(), alist.clone()).unwrap(),
+            &Sexpr::Nil
+        ));
+        let v: Sexpr = Sexpr::List(vec![Sexpr::Nil]);
         assert!(equal_sexprs(
             &evaluate(v.clone(), alist.clone()).unwrap(),
             &Sexpr::Nil

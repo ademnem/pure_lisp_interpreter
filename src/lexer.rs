@@ -41,7 +41,10 @@ fn tokenize_inputs(input: Vec<String>) -> Vec<Token> {
     for part in input {
         match part.as_str() {
             "(" => tokens.push(Token::LParen),
-            ")" => tokens.push(Token::RParen),
+            ")" => {
+                tokens.push(Token::Symbol(String::from("NIL")));
+                tokens.push(Token::RParen);
+            }
             _ => {
                 let atom: Result<i64, _> = part.trim().parse(); // int parser
                 match atom {
@@ -133,13 +136,18 @@ mod tests {
         let mut expected: Vec<Token> = vec![
             Token::LParen,
             Token::Symbol(String::from("+")),
+            Token::Symbol(String::from("NIL")),
             Token::RParen,
         ];
         assert!(compare_token_vectors(result, expected));
 
         input = vec![String::from("("), String::from(")")];
         result = tokenize_inputs(input);
-        expected = vec![Token::LParen, Token::RParen];
+        expected = vec![
+            Token::LParen,
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+        ];
         assert!(compare_token_vectors(result, expected));
 
         input = vec![String::from("+")];
@@ -175,13 +183,18 @@ mod tests {
         let mut expected: Vec<Token> = vec![
             Token::LParen,
             Token::Symbol(String::from("+")),
+            Token::Symbol(String::from("NIL")),
             Token::RParen,
         ];
         assert!(compare_token_vectors(result, expected));
 
         input = String::from("()");
         result = tokenize(&input);
-        expected = vec![Token::LParen, Token::RParen];
+        expected = vec![
+            Token::LParen,
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+        ];
         assert!(compare_token_vectors(result, expected));
 
         input = String::from("+");

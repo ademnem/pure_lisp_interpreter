@@ -21,20 +21,25 @@ pub fn sexpr_to_string(v: &Sexpr) -> String {
         Sexpr::T => String::from("T"),
         Sexpr::Nil => String::from("NIL"),
         Sexpr::List(l) => {
-            let mut str: String = String::from("( ");
-            for sexpr in l {
+            let mut str: String = String::from("(");
+            for sexpr in &l[0..l.len() - 1] {
                 str += sexpr_to_string(sexpr).as_str();
                 str += " ";
             }
+            str += sexpr_to_string(&l[l.len() - 1]).as_str();
             str += ")";
             str
         }
-        Sexpr::Lambda(_, v) => {
-            let mut str: String = String::from("( ");
-            for sexpr in v {
+        Sexpr::Lambda(name, body) => {
+            // not solidified yet
+            let mut str: String = String::from("(");
+            str += name;
+            str += " ";
+            for sexpr in &body[1..body.len() - 1] {
                 str += sexpr_to_string(sexpr).as_str();
                 str += " ";
             }
+            str += sexpr_to_string(&body[body.len() - 1]).as_str();
             str += ")";
             str
         }
@@ -48,6 +53,7 @@ fn parse_atom(token: &Token) -> Sexpr {
         Token::String(s) => Sexpr::String(s.clone()),
         Token::Symbol(s) => match s.as_str() {
             "T" => Sexpr::T,
+            "NIL" => Sexpr::Nil,
             _ => Sexpr::Symbol(s.to_string()),
         },
         _ => Sexpr::Nil, // should never be reached
