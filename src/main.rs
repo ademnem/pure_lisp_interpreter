@@ -19,7 +19,13 @@ fn match_command(command: String) -> i8 {
         "EXIT" => EXIT,
         "" => CONTINUE,
         _ => {
-            let mut tokens: Vec<Token> = tokenize(&command);
+            let mut tokens: Vec<Token> = match tokenize(&command) {
+                Ok(t) => t,
+                Err(s) => {
+                    println!("{}", s);
+                    return CONTINUE;
+                }
+            };
             let symbols: Sexpr = parse(&mut tokens);
             let alist = OBLIST.lock().unwrap().clone();
             match evaluate(symbols, alist) {

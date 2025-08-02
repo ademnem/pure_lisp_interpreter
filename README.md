@@ -5,9 +5,9 @@ Pure Lisp interpreter in Rust
 [X] add doubles
 [X] fix sexpr_to_string for proper lists
 [X] add sexpr_to_string tests
-[ ] add tests for proper lists
+[X] add tests for proper lists
+[X] . short hand for creating improper lists
 [ ] ' short hand for quote
-[ ] . short hand for creating improper lists
 [ ] figure out how to do lambdas 
 
 **_Functions_**  
