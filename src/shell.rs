@@ -15,6 +15,11 @@ fn paren_balance(command: &str) -> i16 {
             ')' => bal -= 1,
             _ => {}
         }
+
+        if bal < 0 {
+            // can never have a ) before a (
+            return -1;
+        }
     }
 
     bal
