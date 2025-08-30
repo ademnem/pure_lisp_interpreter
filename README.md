@@ -6,7 +6,7 @@ Pure Lisp interpreter in Rust
 [X] fix sexpr_to_string for proper lists
 [X] add sexpr_to_string tests
 [X] add tests for proper lists
-[X] . short hand for creating improper lists
+[ ] redo . short hand for creating improper lists (requires cons)
 [ ] ' short hand for quote
 [ ] figure out how to do lambdas 
 

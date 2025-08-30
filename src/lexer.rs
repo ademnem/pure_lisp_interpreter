@@ -1,3 +1,5 @@
+use std::{iter::Peekable, vec::IntoIter};
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     Integer(i64),
@@ -20,7 +22,10 @@ pub fn token_to_string(v: &Token) -> String {
 }
 
 fn space_inputs(input: &String) -> String {
-    input.replace("(", " ( ").replace(")", " ) ")
+    input
+        .replace("(", " ( ")
+        .replace(")", " ) ")
+        .replace("'", " ' ")
 }
 fn space_separate_inputs(input: &str) -> Vec<String> {
     let inputs: Vec<&str> = input.split_whitespace().collect();
@@ -35,93 +40,116 @@ fn space_separate_inputs(input: &str) -> Vec<String> {
     outputs
 }
 
-fn tokenize_inputs(input: Vec<String>) -> Result<Vec<Token>, String> {
-    let mut tokens: Vec<Token> = Vec::new();
-    let mut iter = input.into_iter().peekable();
+fn get_datatype(input: &String) -> Token {
+    match input.as_str() {
+        "(" => Token::LParen,
+        ")" => Token::RParen,
+        _ => match input.trim().parse() {
+            Ok(i) => Token::Integer(i),
+            Err(_) => match input.trim().parse::<f64>() {
+                Ok(f) => Token::Float(f),
+                Err(_) => {
+                    if input.starts_with("\"") && input.ends_with("\"") {
+                        Token::String(input.to_string())
+                    } else {
+                        Token::Symbol(input.to_string())
+                    }
+                }
+            },
+        },
+    }
+}
 
+// only one that actually moves the pointer for the iterator
+fn tokenize_input(
+    iter: &mut Peekable<IntoIter<String>>,
+    tokens: &mut Vec<Token>,
+) -> Result<Vec<Token>, String> {
+    if iter.peek() == None {
+        return Err(String::from(
+            "tokenize_input: input is required to tokenize",
+        ));
+    }
+    let data = iter.next().unwrap();
+    match get_datatype(&data) {
+        Token::LParen => {
+            tokens.push(Token::LParen);
+            tokenize_list(iter, tokens);
+        }
+        Token::Symbol(s) => match s.as_str() {
+            /*
+            "." => {
+                // needs to check prev through tokens
+                // needs to check next through iter.peek().unwrap()
+                let atom = iter.next();
+                let rparen = iter.peek();
+                if tokens.last() == None {
+                    return Err(String::from(
+                        "tokenize_input: . must be preceded by an atom or list",
+                    ));
+                }
+                if atom == None
+                    || atom == Some(String::from("("))
+                    || atom == Some(String::from(")"))
+                    || atom == Some(String::from("."))
+                    || atom == Some(String::from("'"))
+                {
+                    return Err(String::from(
+                        "tokenize_input: . must be followed by an atom or list",
+                    ));
+                }
+                if rparen != Some(&String::from(")")) {
+                    return Err(String::from("tokenize_input: atom must be followed by )"));
+                }
+
+                let atom = atom.unwrap();
+                tokens.push(get_datatype(atom));
+            }
+            */
+            "'" => {
+                // can't be followed by .
+                // just replace it with ( QUOTE input )
+                // peek next and see if it is a list or atom
+                // then call tokenize_input or tokenize_list
+            }
+            _ => tokens.push(Token::Symbol(s)),
+        },
+        t => tokens.push(t),
+    }
+
+    Ok(tokens.to_vec())
+}
+fn tokenize_list(
+    iter: &mut Peekable<IntoIter<String>>,
+    tokens: &mut Vec<Token>,
+) -> Result<Vec<Token>, String> {
     while iter.peek() != None {
-        let part = iter.next().unwrap();
-        match part.as_str() {
-            "(" => tokens.push(Token::LParen),
-            ")" => {
-                // if the second to last element is . then we don't add a nil
-                // we need to look out for . in general since it is a reserved symbol
+        let part = iter.peek().unwrap();
+        match get_datatype(part) {
+            Token::RParen => {
+                iter.next();
                 tokens.push(Token::Symbol(String::from("NIL")));
                 tokens.push(Token::RParen);
             }
-            _ => {
-                match part.trim().parse() {
-                    Ok(i) => tokens.push(Token::Integer(i)),
-                    Err(_) => {
-                        // add the double parser here
-                        match part.trim().parse::<f64>() {
-                            Ok(f) => tokens.push(Token::Float(f)),
-                            Err(_) => {
-                                if part.starts_with("\"") && part.ends_with("\"") {
-                                    tokens.push(Token::String(part.to_string()));
-                                } else {
-                                    match part.as_str() {
-                                        "." => {
-                                            // allowed to quote (1 . 1) lists now
-                                            let atom = iter.next();
-                                            let rparen = iter.next();
-                                            if atom == None
-                                                || atom == Some(String::from(")"))
-                                                || atom == Some(String::from("("))
-                                                || atom == Some(String::from("."))
-                                            {
-                                                return Err(String::from("tokenize_inputs: . must be followed by an atom"));
-                                            }
-                                            if rparen != Some(String::from(")")) {
-                                                return Err(String::from(
-                                                    "tokenize_inputs: atom must be followed by )",
-                                                ));
-                                            }
-
-                                            let atom = atom.unwrap();
-                                            match atom.trim().parse() {
-                                                Ok(i) => tokens.push(Token::Integer(i)),
-                                                Err(_) => match atom.trim().parse::<f64>() {
-                                                    Ok(f) => tokens.push(Token::Float(f)),
-                                                    Err(_) => {
-                                                        if atom.starts_with("\"")
-                                                            && atom.ends_with("\"")
-                                                        {
-                                                            tokens.push(Token::String(
-                                                                atom.to_string(),
-                                                            ));
-                                                        } else {
-                                                            tokens.push(Token::Symbol(
-                                                                atom.to_string(),
-                                                            ));
-                                                        }
-                                                    }
-                                                },
-                                            };
-                                            tokens.push(Token::RParen);
-                                        }
-                                        _ => tokens.push(Token::Symbol(part)),
-                                    };
-                                    // if it is a . then we need to check the next two items
-                                    // and make sure they are some atom and then a )
-                                    // afterwards a NIL will not be added
-
-                                    // if you see a ' then add a ( quote ... )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            _ => match tokenize_input(iter, tokens) {
+                Err(e) => return Err(e),
+                Ok(_) => {} // returned Vec<Token> should be the same as tokens
+            },
         }
     }
+    Ok(tokens.to_vec())
+}
+fn tokenize_inputs(input: Vec<String>) -> Result<Vec<Token>, String> {
+    let mut tokens: Vec<Token> = Vec::new();
+    let mut iter: Peekable<IntoIter<String>> = input.into_iter().peekable();
 
-    Ok(tokens)
+    tokenize_input(&mut iter, &mut tokens)
 }
 
 pub fn tokenize(input: &String) -> Result<Vec<Token>, String> {
     let spaced_input = space_inputs(&input);
     let space_separated_input: Vec<String> = space_separate_inputs(&spaced_input);
+
     tokenize_inputs(space_separated_input)
 }
 
@@ -145,6 +173,10 @@ mod tests {
 
         input = String::from("");
         expected = String::from("");
+        assert_eq!(space_inputs(&input), expected);
+
+        input = String::from("'(1)");
+        expected = String::from(" '  ( 1 ) ");
         assert_eq!(space_inputs(&input), expected);
     }
 
@@ -176,6 +208,27 @@ mod tests {
             }
         }
         true
+    }
+
+    #[test]
+    fn test_get_datatype() {
+        let mut input = String::from("(");
+        assert_eq!(get_datatype(&input), Token::LParen);
+
+        input = String::from(")");
+        assert_eq!(get_datatype(&input), Token::RParen);
+
+        input = String::from("1");
+        assert_eq!(get_datatype(&input), Token::Integer(1));
+
+        input = String::from("234.1");
+        assert_eq!(get_datatype(&input), Token::Float(234.1));
+
+        input = String::from("\"hello\"");
+        assert_eq!(
+            get_datatype(&input),
+            Token::String(String::from("\"hello\""))
+        );
     }
 
     #[test]
@@ -211,8 +264,12 @@ mod tests {
 
         input = Vec::new();
         result = tokenize_inputs(input);
-        expected = Vec::new();
-        assert!(compare_token_vectors(result.unwrap(), expected));
+        assert_eq!(
+            result,
+            Err(String::from(
+                "tokenize_input: input is required to tokenize",
+            ))
+        );
 
         input = vec![String::from("1")];
         result = tokenize_inputs(input);
@@ -224,6 +281,7 @@ mod tests {
         expected = vec![Token::Float(1.1)];
         assert!(compare_token_vectors(result.unwrap(), expected));
 
+        /*
         input = vec![
             String::from("("),
             String::from("1.1"),
@@ -267,6 +325,7 @@ mod tests {
             result,
             Err(String::from("tokenize_inputs: atom must be followed by )"))
         );
+        */
     }
 
     #[test]
@@ -307,8 +366,12 @@ mod tests {
 
         input = String::new();
         result = tokenize(&input);
-        expected = Vec::new();
-        assert!(compare_token_vectors(result.unwrap(), expected));
+        assert_eq!(
+            result,
+            Err(String::from(
+                "tokenize_input: input is required to tokenize",
+            ))
+        );
 
         input = String::from("\"hello\"");
         result = tokenize(&input);
