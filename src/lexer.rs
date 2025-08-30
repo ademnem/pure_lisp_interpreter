@@ -107,10 +107,17 @@ fn tokenize_input(
             }
             */
             "'" => {
-                // can't be followed by .
-                // just replace it with ( QUOTE input )
-                // peek next and see if it is a list or atom
-                // then call tokenize_input or tokenize_list
+                if iter.peek() == None || iter.peek() == Some(&String::from(".")) {
+                    return Err(String::from(
+                        "tokenize_input: ' must be followed by an atom or list",
+                    ));
+                }
+
+                tokens.push(Token::LParen);
+                tokens.push(Token::Symbol(String::from("QUOTE")));
+                let _ = tokenize_input(iter, tokens);
+                tokens.push(Token::Symbol(String::from("NIL")));
+                tokens.push(Token::RParen);
             }
             _ => tokens.push(Token::Symbol(s)),
         },
@@ -201,13 +208,17 @@ mod tests {
     }
 
     fn compare_token_vectors(result: Vec<Token>, expected: Vec<Token>) -> bool {
-        let comp = result.iter().zip(&expected);
-        for (r, e) in comp {
-            if r != e {
-                return false;
+        if result.len() != expected.len() {
+            false
+        } else {
+            let comp = result.iter().zip(&expected);
+            for (r, e) in comp {
+                if r != e {
+                    return false;
+                }
             }
+            true
         }
-        true
     }
 
     #[test]
@@ -280,6 +291,65 @@ mod tests {
         result = tokenize_inputs(input);
         expected = vec![Token::Float(1.1)];
         assert!(compare_token_vectors(result.unwrap(), expected));
+
+        input = vec![
+            String::from("'"),
+            String::from("("),
+            String::from("1.1"),
+            String::from(")"),
+        ];
+        result = tokenize_inputs(input);
+        // this should not be passing rn
+        expected = vec![
+            Token::LParen,
+            Token::Symbol(String::from("QUOTE")),
+            Token::LParen,
+            Token::Float(1.1),
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+        ];
+        assert!(compare_token_vectors(result.unwrap(), expected));
+
+        input = vec![
+            String::from("'"),
+            String::from("'"),
+            String::from("("),
+            String::from("1.1"),
+            String::from(")"),
+        ];
+        result = tokenize_inputs(input);
+        expected = vec![
+            Token::LParen,
+            Token::Symbol(String::from("QUOTE")),
+            Token::LParen,
+            Token::Symbol(String::from("QUOTE")),
+            Token::LParen,
+            Token::Float(1.1),
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+            Token::Symbol(String::from("NIL")),
+            Token::RParen,
+        ];
+        assert!(compare_token_vectors(result.unwrap(), expected));
+
+        input = vec![
+            String::from("'"),
+            String::from("."),
+            String::from("("),
+            String::from("1.1"),
+            String::from(")"),
+        ];
+        result = tokenize_inputs(input);
+        assert_eq!(
+            result,
+            Err(String::from(
+                "tokenize_input: ' must be followed by an atom or list",
+            ))
+        );
 
         /*
         input = vec![
