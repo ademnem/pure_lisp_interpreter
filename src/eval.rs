@@ -46,6 +46,7 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             "/" => divide(args, alist.clone()),
             "MOD" => modulo(args, alist.clone()),
             "PRINT" => print(args, alist.clone()),
+            "EVAL" => eval(args, alist.clone()),
             _ => Ok(Sexpr::Nil),
         },
         _ => Err(String::from("apply_atom: requires symbol as first arg")),

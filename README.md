@@ -26,7 +26,7 @@ Pure Lisp interpreter in Rust
 [X] / (divide)
 [X] mod  
 [X] print  
-[ ] eval  
+[X] eval  
 [ ] cons  
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
