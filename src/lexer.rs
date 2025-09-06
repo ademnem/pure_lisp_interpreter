@@ -74,7 +74,7 @@ fn tokenize_input(
     match get_datatype(&data) {
         Token::LParen => {
             tokens.push(Token::LParen);
-            tokenize_list(iter, tokens);
+            let _ = tokenize_list(iter, tokens);
         }
         Token::Symbol(s) => match s.as_str() {
             /*
