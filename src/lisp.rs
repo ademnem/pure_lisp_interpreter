@@ -89,12 +89,12 @@ pub fn setq(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     match symbol {
         Sexpr::Symbol(s) => {
             if s == String::from("NIL") {
-                return Err(String::from("NIL is not a valid symbol name"));
+                return Err(String::from("setq: NIL is not a valid symbol name"));
             } else {
                 OBLIST.lock().unwrap().push((s, value.clone()))
             }
         }
-        _ => return Err(String::from("first arg must be a symbol")),
+        _ => return Err(String::from("setq: first arg must be a symbol")),
     }
 
     Ok(value)
@@ -109,7 +109,7 @@ pub fn equal(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
     let left: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("equal: no second arg")),
+            None => return Err(String::from("equal: no first arg")),
         },
         alist.clone(),
     ) {
@@ -177,9 +177,9 @@ pub fn null(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let mut arg = match &args {
         Sexpr::List(l) => match l.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("listp: args list is empty")),
+            None => return Err(String::from("null: args list is empty")),
         },
-        _ => return Err(String::from("listp: args must be a list")),
+        _ => return Err(String::from("null: args must be a list")),
     };
     arg = match evaluate(arg, alist.clone()) {
         Ok(o) => o,
@@ -221,7 +221,7 @@ pub fn add(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let num1: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("add: no second arg")),
+            None => return Err(String::from("add: no first arg")),
         },
         alist.clone(),
     ) {
@@ -257,7 +257,7 @@ pub fn subtract(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, Strin
     let num1: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("subtract: no second arg")),
+            None => return Err(String::from("subtract: no first arg")),
         },
         alist.clone(),
     ) {
@@ -293,7 +293,7 @@ pub fn multiply(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, Strin
     let num1: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("multiply: no second arg")),
+            None => return Err(String::from("multiply: no first arg")),
         },
         alist.clone(),
     ) {
@@ -329,7 +329,7 @@ pub fn divide(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String>
     let num1: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("divide: no second arg")),
+            None => return Err(String::from("divide: no first arg")),
         },
         alist.clone(),
     ) {
@@ -395,13 +395,13 @@ pub fn modulo(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String>
 pub fn print(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let args: Vec<Sexpr> = match &args {
         Sexpr::List(l) => l.clone(),
-        _ => return Err(String::from("divide: args must be a list")),
+        _ => return Err(String::from("print: args must be a list")),
     };
 
     let arg: Sexpr = match evaluate(
         match args.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("divide: no second arg")),
+            None => return Err(String::from("print: no second arg")),
         },
         alist.clone(),
     ) {
@@ -412,8 +412,16 @@ pub fn print(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
     print!("{}", sexpr_to_string(&arg));
     Ok(Sexpr::String(String::new()))
 }
-// fn eval_cond(clauses alist)
-// fn eval_defun(body alist)
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    print!("{}", sexpr_to_string(&arg));
+    Ok(Sexpr::String(String::new()))
+}
 
 #[cfg(test)]
 mod tests {
