@@ -433,6 +433,42 @@ pub fn eval(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     evaluate(arg, alist.clone())
 }
 
+pub fn cons(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("cons: args must be a list")),
+    };
+
+    let arg1: Sexpr = match evaluate(
+        match args.first() {
+            Some(s) => s.clone(),
+            None => return Err(String::from("cons: no first arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+    let arg2: Sexpr = match evaluate(
+        match args.get(1) {
+            Some(s) => s.clone(),
+            None => return Err(String::from("cons: no second arg")),
+        },
+        alist.clone(),
+    ) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
+
+    match (arg1, arg2) {
+        (l, Sexpr::List(mut r)) => {
+            r.insert(0, l);
+            Ok(Sexpr::List(r))
+        }
+        (l, r) => Ok(Sexpr::List(vec![l, r])),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -687,5 +723,36 @@ mod tests {
             Sexpr::Symbol(String::from("X")),
         ])]);
         assert_eq!(eval(args, alist.clone()), Ok(Sexpr::Integer(1)));
+    }
+
+    #[test]
+    fn test_cons() {
+        let mut arg1: Sexpr = Sexpr::Integer(1);
+        let mut arg2: Sexpr = Sexpr::Integer(1);
+        let mut args: Sexpr = Sexpr::List(vec![arg1, arg2]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        let mut result: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        assert_eq!(cons(args, alist.clone()), Ok(result));
+
+        arg1 = Sexpr::Integer(1);
+        arg2 = Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Nil]),
+        ]);
+        args = Sexpr::List(vec![arg1, arg2]);
+        result = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1), Sexpr::Nil]);
+        assert_eq!(cons(args, alist.clone()), Ok(result));
+
+        arg1 = Sexpr::List(vec![
+            Sexpr::Symbol(String::from("QUOTE")),
+            Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Nil]),
+        ]);
+        arg2 = Sexpr::Integer(1);
+        args = Sexpr::List(vec![arg1, arg2]);
+        result = Sexpr::List(vec![
+            Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Nil]),
+            Sexpr::Integer(1),
+        ]);
+        assert_eq!(cons(args, alist.clone()), Ok(result));
     }
 }

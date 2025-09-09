@@ -7,7 +7,8 @@ Pure Lisp interpreter in Rust
 [X] add sexpr_to_string tests
 [X] add tests for proper lists
 [X] ' short hand for quote
-[ ] redo . short hand for creating improper lists (requires cons)
+[ ] redo . short hand for creating improper lists (requires cons and only in quote)
+- (+ 1 1 . 1) => 2
 [ ] figure out how to do lambdas (just store the list for the function?)
 
 **_Functions_**  
@@ -27,7 +28,12 @@ Pure Lisp interpreter in Rust
 [X] mod  
 [X] print  
 [X] eval  
-[ ] cons  
+[X] cons  
+basically the second value gets concatenated to the first
+- (cons 1 1) => (1 . 1)
+- (cons '(1 1) '(1 1)) => ((1 1) 1 1)
+- (cons 1 '(1 1 1)) => (1 1 1 1)
+- (cons '(1 1 1) 1) => ((1 1 1) . 1)
 [ ] cond  
 [ ] defun (what happens if a param is nil?) 
 [ ] eq (address equality / literal equality) (requires string interning)
