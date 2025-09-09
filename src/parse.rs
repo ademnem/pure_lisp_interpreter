@@ -35,7 +35,7 @@ pub fn sexpr_to_string(v: &Sexpr) -> String {
                 }
                 str += ")";
             } else {
-                // you can't have a list with only a non nil
+                // you can't have a list with only non nil
                 for sexpr in &l[0..l.len() - 2] {
                     str += sexpr_to_string(sexpr).as_str();
                     str += " ";
@@ -134,16 +134,27 @@ mod tests {
 
     #[test]
     fn test_sexpr_to_string() {
-        let input: Sexpr = Sexpr::List(vec![Sexpr::Nil]);
-        let expected: String = String::from("()");
+        let mut input: Sexpr = Sexpr::List(vec![Sexpr::Nil]);
+        let mut expected: String = String::from("()");
         assert_eq!(sexpr_to_string(&input), expected);
 
-        let input: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1), Sexpr::Nil]);
-        let expected: String = String::from("(1 1)");
+        input = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1), Sexpr::Nil]);
+        expected = String::from("(1 1)");
         assert_eq!(sexpr_to_string(&input), expected);
 
-        let input: Sexpr = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
-        let expected: String = String::from("(1 . 1)");
+        input = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        expected = String::from("(1 . 1)");
+        assert_eq!(sexpr_to_string(&input), expected);
+
+        input = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1), Sexpr::Nil]);
+        expected = String::from("(1 1)");
+        assert_eq!(sexpr_to_string(&input), expected);
+
+        input = Sexpr::List(vec![
+            Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Nil]),
+            Sexpr::Integer(1),
+        ]);
+        expected = String::from("((1) . 1)");
         assert_eq!(sexpr_to_string(&input), expected);
     }
 
