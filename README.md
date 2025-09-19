@@ -34,6 +34,10 @@ basically the second value gets concatenated to the first
 - (cons '(1 1) '(1 1)) => ((1 1) 1 1)
 - (cons 1 '(1 1 1)) => (1 1 1 1)
 - (cons '(1 1 1) 1) => ((1 1 1) . 1)
-[ ] cond  
+[X] cond  
+(cond 
+    ((conditional) (return value))
+    (t (return value))
+)
 [ ] defun (what happens if a param is nil?) 
 [ ] eq (address equality / literal equality) (requires string interning)

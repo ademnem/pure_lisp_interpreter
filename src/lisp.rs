@@ -469,6 +469,55 @@ pub fn cons(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     }
 }
 
+pub fn cond(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
+    let clauses: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("cond: args must be a list")),
+    };
+
+    //(
+    //  ((conditional) (return value))
+    //  (t (return value))
+    //)
+    for clause in clauses {
+        let (mut test, body): (Sexpr, Sexpr) = match clause {
+            Sexpr::List(l) => {
+                if l.len() != 3 {
+                    // 3 because NIL is added to the end
+                    return Err(String::from("cond: clause must be len 2"));
+                }
+
+                let test: Sexpr = match l.first() {
+                    Some(s) => s.clone(),
+                    None => return Err(String::from("cond: clause doesn't have a first arg")),
+                };
+
+                let body: Sexpr = match l.get(1) {
+                    Some(s) => s.clone(),
+                    None => return Err(String::from("cond: clause doesn't have a first arg")),
+                };
+
+                (test, body)
+            }
+            Sexpr::Nil => break, // reached the end of the list
+            _ => return Err(String::from("cond: each clause must be a list")),
+        };
+
+        // anything that isn't NIL is T
+        test = match evaluate(test, alist.clone()) {
+            Ok(o) => o,
+            e => return e, // error
+        };
+
+        match test {
+            Sexpr::Nil => {}
+            _ => return evaluate(body, alist.clone()),
+        }
+    }
+
+    Ok(Sexpr::Nil)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -754,5 +803,27 @@ mod tests {
             Sexpr::Integer(1),
         ]);
         assert_eq!(cons(args, alist.clone()), Ok(result));
+    }
+
+    #[test]
+    fn test_cond() {
+        let mut args: Sexpr = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::T,
+            Sexpr::Integer(1),
+            Sexpr::Nil,
+        ])]);
+        let mut alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(cond(args, alist.clone()), Ok(Sexpr::Integer(1)));
+
+        args = Sexpr::List(vec![Sexpr::List(vec![
+            Sexpr::T,
+            Sexpr::Symbol(String::from("X")),
+            Sexpr::Nil,
+        ])]);
+        alist.push((String::from("X"), Sexpr::Float(1.11)));
+        assert_eq!(cond(args, alist.clone()), Ok(Sexpr::Float(1.11)));
+
+        args = Sexpr::List(vec![Sexpr::Nil]);
+        assert_eq!(cond(args, alist.clone()), Ok(Sexpr::Nil));
     }
 }
