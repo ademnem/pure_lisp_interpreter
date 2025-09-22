@@ -198,7 +198,7 @@ mod tests {
     fn unpack_list(list: &Sexpr) -> Result<&Vec<Sexpr>, &str> {
         match list {
             Sexpr::List(vec) => Ok(&vec),
-            _ => Err(""),
+            _ => Err("unpack_list - arg was not a list"),
         }
     }
 

@@ -67,7 +67,7 @@ fn tokenize_input(
 ) -> Result<Vec<Token>, String> {
     if iter.peek() == None {
         return Err(String::from(
-            "tokenize_input: input is required to tokenize",
+            "tokenize_input - input is required to tokenize",
         ));
     }
     let data = iter.next().unwrap();
@@ -77,39 +77,10 @@ fn tokenize_input(
             let _ = tokenize_list(iter, tokens);
         }
         Token::Symbol(s) => match s.as_str() {
-            /*
-            "." => {
-                // needs to check prev through tokens
-                // needs to check next through iter.peek().unwrap()
-                let atom = iter.next();
-                let rparen = iter.peek();
-                if tokens.last() == None {
-                    return Err(String::from(
-                        "tokenize_input: . must be preceded by an atom or list",
-                    ));
-                }
-                if atom == None
-                    || atom == Some(String::from("("))
-                    || atom == Some(String::from(")"))
-                    || atom == Some(String::from("."))
-                    || atom == Some(String::from("'"))
-                {
-                    return Err(String::from(
-                        "tokenize_input: . must be followed by an atom or list",
-                    ));
-                }
-                if rparen != Some(&String::from(")")) {
-                    return Err(String::from("tokenize_input: atom must be followed by )"));
-                }
-
-                let atom = atom.unwrap();
-                tokens.push(get_datatype(atom));
-            }
-            */
             "'" => {
                 if iter.peek() == None || iter.peek() == Some(&String::from(".")) {
                     return Err(String::from(
-                        "tokenize_input: ' must be followed by an atom or list",
+                        "tokenize_input - ' must be followed by an atom or list",
                     ));
                 }
 
@@ -279,7 +250,7 @@ mod tests {
         assert_eq!(
             result,
             Err(String::from(
-                "tokenize_input: input is required to tokenize",
+                "tokenize_input - input is required to tokenize",
             ))
         );
 
@@ -348,7 +319,7 @@ mod tests {
         assert_eq!(
             result,
             Err(String::from(
-                "tokenize_input: ' must be followed by an atom or list",
+                "tokenize_input - ' must be followed by an atom or list",
             ))
         );
 
@@ -422,7 +393,7 @@ mod tests {
         result = tokenize_inputs(input);
         assert_eq!(
             result,
-            Err(String::from("tokenize_inputs: atom must be followed by )"))
+            Err(String::from("tokenize_inputs - atom must be followed by )"))
         );
         */
     }
@@ -468,7 +439,7 @@ mod tests {
         assert_eq!(
             result,
             Err(String::from(
-                "tokenize_input: input is required to tokenize",
+                "tokenize_input - input is required to tokenize",
             ))
         );
 

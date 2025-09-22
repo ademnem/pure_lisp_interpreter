@@ -51,7 +51,7 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             "COND" => cond(args, alist.clone()),
             _ => Ok(Sexpr::Nil),
         },
-        _ => Err(String::from("apply_atom: requires symbol as first arg")),
+        _ => Err(String::from("apply_atom - requires symbol as first arg")),
     }
 }
 
@@ -60,9 +60,9 @@ fn apply(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     let f = match &v {
         Sexpr::List(l) => match l.first() {
             Some(s) => s.clone(),
-            None => return Err(String::from("apply: list is empty")),
+            None => return Err(String::from("apply - list is empty")),
         },
-        _ => return Err(String::from("apply: val passed in was not a list")),
+        _ => return Err(String::from("apply - val passed in was not a list")),
     };
 
     // create copy of args
@@ -71,10 +71,10 @@ fn apply(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
             if l.len() >= 2 {
                 Sexpr::List(l[1..].to_vec())
             } else {
-                return Err(String::from("apply: v len must be >= 2"));
+                return Err(String::from("apply - v len must be >= 2"));
             }
         }
-        _ => return Err(String::from("apply: v must be a list")),
+        _ => return Err(String::from("apply - v must be a list")),
     };
 
     match f {
@@ -113,10 +113,7 @@ pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
 
 #[cfg(test)]
 mod tests {
-    use crate::test;
-
     use super::*;
-    use test::*;
 
     #[test]
     fn test_assoc() {
