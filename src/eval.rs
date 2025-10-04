@@ -1,6 +1,5 @@
 use crate::lisp::*;
 use crate::parse::*;
-use crate::test::*;
 
 fn assoc(v: String, alist: Vec<(String, Sexpr)>) -> Sexpr {
     for (s, o) in alist.iter().rev() {
@@ -114,6 +113,7 @@ pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test::*;
 
     #[test]
     fn test_assoc() {
@@ -197,38 +197,17 @@ mod tests {
 
     #[test]
     fn test_apply_atom() {
-        let mut f = Sexpr::Symbol(String::from("QUOTE"));
-        let mut quoted = Sexpr::List(vec![
-            Sexpr::Integer(1),
-            Sexpr::Integer(2),
-            Sexpr::Integer(3),
-        ]);
-        let mut args = Sexpr::List(vec![quoted.clone()]);
-        let alist = Vec::new();
-        assert!(equal_sexprs(
-            &apply_atom(f.clone(), args.clone(), alist.clone()).unwrap(),
-            &quoted
-        ));
-
-        /*
-        f = Sexpr::Symbol(String::from("CAR"));
+        let f = Sexpr::Symbol(String::from("QUOTE"));
         let quoted = Sexpr::List(vec![
             Sexpr::Integer(1),
             Sexpr::Integer(2),
             Sexpr::Integer(3),
         ]);
-        args = Sexpr::List(vec![Sexpr::Symbol(String::from("QUOTE")), quoted.clone()]);
-        match apply_atom(f.clone(), args.clone(), alist.clone()) {
-            Ok(s) => match s {
-                Sexpr::Integer(i) => println!("{}", i),
-                _ => println!("no"),
-            },
-            Err(e) => println!("{}", e),
-        }
+        let args = Sexpr::List(vec![quoted.clone()]);
+        let alist = Vec::new();
         assert!(equal_sexprs(
             &apply_atom(f.clone(), args.clone(), alist.clone()).unwrap(),
-            &Sexpr::Integer(1)
+            &quoted
         ));
-        */
     }
 }
