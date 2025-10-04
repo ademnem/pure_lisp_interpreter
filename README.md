@@ -1,5 +1,11 @@
 # pure_lisp_interpreter
-Pure Lisp interpreter in Rust
+Pure Lisp Interpreter in Rust
+
+This is my first time coding in Rust. Through this project I learned a lot about the variety of datatypes, ownership, and generally good practices that I can translate to other languages. I really enjoyed `cargo` and how it sets a standard compiler, package manager and provides a convenient testing suite. More languages should do this.
+
+This project is done for now but there are definitely some ideas that I want to come back to:
+1. How to accomplish string interning without writing unsafe code in Rust.
+2. Can I make the code more memory efficient? Should I really being using Strings everywhere?
 
 ## Todo (in any order)
 [X] add doubles
