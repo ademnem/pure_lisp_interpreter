@@ -14,7 +14,7 @@ pub fn quote(args: Sexpr) -> Result<Sexpr, String> {
             Some(s) => Ok(s.clone()),
             None => Err(String::from("quote - list is empty")),
         },
-        _ => Err(String::from("quote - something went wrong")), // lambda should also return itself right?
+        _ => Err(String::from("quote - something went wrong")),
     }
 }
 
@@ -518,6 +518,93 @@ pub fn cond(args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     Ok(Sexpr::Nil)
 }
 
+pub fn defun(args: Sexpr) -> Result<Sexpr, String> {
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from("defun - args must be a list")),
+    };
+
+    let symbol: Sexpr = match args.first() {
+        Some(s) => match s {
+            Sexpr::Symbol(_) => s.clone(),
+            _ => return Err(String::from("defun - function name must be a symbol")),
+        },
+        None => return Err(String::from("defun - no function name arg")),
+    };
+    let params: Sexpr = match args.get(1) {
+        Some(s) => match s {
+            Sexpr::List(_) => s.clone(),
+            _ => return Err(String::from("defun - params must be a list")),
+        },
+        None => return Err(String::from("defun - no params arg")),
+    };
+    let body: Sexpr = match args.get(2) {
+        Some(s) => s.clone(),
+        None => return Err(String::from("defun - no body arg")),
+    };
+
+    match &symbol {
+        Sexpr::Symbol(s) => {
+            if s.to_string() == String::from("NIL") {
+                return Err(String::from("defun - NIL is not a valid symbol name"));
+            } else {
+                OBLIST
+                    .lock()
+                    .unwrap()
+                    .push((s.to_string(), Sexpr::List(vec![params, body, Sexpr::Nil])))
+            }
+        }
+        _ => return Err(String::from("defun - first arg must be a symbol")),
+    }
+
+    Ok(symbol)
+}
+
+pub fn func(
+    name: String,
+    lambda: Sexpr,
+    args: Sexpr,
+    mut alist: Vec<(String, Sexpr)>,
+) -> Result<Sexpr, String> {
+    let list: Vec<Sexpr> = match lambda {
+        Sexpr::List(l) => l,
+        _ => return Err(String::from(name + ", func - is not a valid function")),
+    };
+
+    let params: Vec<Sexpr> = match list.first() {
+        Some(s) => match s {
+            Sexpr::List(l) => l.to_vec(),
+            _ => return Err(String::from(name + ", func - params must be a list")),
+        },
+        None => return Err(String::from(name + ", func - no params arg")),
+    };
+
+    let body: Sexpr = match list.get(1) {
+        Some(s) => s.clone(),
+        None => return Err(String::from(name + ", func - no body")),
+    };
+
+    let args: Vec<Sexpr> = match &args {
+        Sexpr::List(l) => l.clone(),
+        _ => return Err(String::from(name + ", func - args must be a list")),
+    };
+
+    if params.len() > args.len() {
+        return Err(String::from(name + ", func - not enough args"));
+    }
+
+    for (p, a) in params.iter().zip(args.iter()) {
+        let p = match p {
+            Sexpr::Symbol(s) => s,
+            Sexpr::Nil => break,
+            _ => return Err(String::from(name + ", func - each param must be a symbol")),
+        };
+        alist.push((p.clone(), a.clone()));
+    }
+
+    evaluate(body, alist.clone())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -825,5 +912,33 @@ mod tests {
 
         args = Sexpr::List(vec![Sexpr::Nil]);
         assert_eq!(cond(args, alist.clone()), Ok(Sexpr::Nil));
+    }
+
+    #[test]
+    fn test_defun() {
+        let name = Sexpr::Symbol(String::from("FUNC"));
+        let params = Sexpr::List(vec![Sexpr::Symbol(String::from("X"))]);
+        let body = Sexpr::List(vec![
+            Sexpr::Symbol(String::from("+")),
+            Sexpr::Symbol(String::from("X")),
+            Sexpr::Symbol(String::from("X")),
+        ]);
+        let args = Sexpr::List(vec![name.clone(), params, body]);
+        assert_eq!(defun(args), Ok(name));
+    }
+
+    #[test]
+    fn test_func() {
+        let name = String::from("ADD");
+        let params = Sexpr::List(vec![Sexpr::Symbol(String::from("X"))]);
+        let body = Sexpr::List(vec![
+            Sexpr::Symbol(String::from("+")),
+            Sexpr::Symbol(String::from("X")),
+            Sexpr::Symbol(String::from("X")),
+        ]);
+        let lambda = Sexpr::List(vec![params, body]);
+        let args = Sexpr::List(vec![Sexpr::Integer(1), Sexpr::Integer(1)]);
+        let alist: Vec<(String, Sexpr)> = Vec::new();
+        assert_eq!(func(name, lambda, args, alist), Ok(Sexpr::Integer(2)));
     }
 }

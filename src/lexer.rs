@@ -77,6 +77,7 @@ fn tokenize_input(
             let _ = tokenize_list(iter, tokens);
         }
         Token::Symbol(s) => match s.as_str() {
+            "." => {} // needs to do something
             "'" => {
                 if iter.peek() == None || iter.peek() == Some(&String::from(".")) {
                     return Err(String::from(

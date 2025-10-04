@@ -19,13 +19,13 @@ fn eval_list(l: Sexpr, alist: Vec<String, Sexpr>) -> Sexpr {
 
 // fn bind_formals(formals: Sexpr, actuals: Sexpr, alist: Vec<String, Sexpr>) {}
 // pass a mutable reference of the formal and replace it with the actual
-*/
 fn apply_lambda(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     // not sure how to dynamically create and store a lambda in rust
     // maybe i just store the list for the function and evaluate it when the function is called
     // yeah i'll do that, later tho...
     Ok(Sexpr::Nil)
 }
+*/
 fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
     // args is a list containing the args of the function
     // (arg1 arg2 ... argN)
@@ -49,7 +49,14 @@ fn apply_atom(f: Sexpr, args: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexp
             "EVAL" => eval(args, alist.clone()),
             "CONS" => cons(args, alist.clone()),
             "COND" => cond(args, alist.clone()),
-            _ => Ok(Sexpr::Nil),
+            "DEFUN" => defun(args),
+            _ => {
+                let lambda: Sexpr = match assoc(s.clone(), alist.clone()) {
+                    Sexpr::Nil => return Err(String::from(s + " function not found")),
+                    s => s,
+                };
+                func(s, lambda, args, alist.clone())
+            }
         },
         _ => Err(String::from("apply_atom - requires symbol as first arg")),
     }
@@ -79,16 +86,10 @@ fn apply(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> {
 
     match f {
         Sexpr::Symbol(_) => apply_atom(f, args, alist.clone()), // do i need to clone the alist here? it's safe to do so...
-        Sexpr::Lambda(_, _) => apply_lambda(f, args, alist.clone()),
         _ => Ok(Sexpr::Nil),
     }
 }
 
-// idk what this is supposed to do really
-fn eval_list(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
-    // calls apply
-    Sexpr::Nil
-}
 fn eval_atom(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Sexpr {
     match v {
         Sexpr::Symbol(s) => assoc(s, alist),
@@ -106,7 +107,6 @@ pub fn evaluate(v: Sexpr, alist: Vec<(String, Sexpr)>) -> Result<Sexpr, String> 
                 apply(v, alist.clone())
             }
         }
-        Sexpr::Lambda(_, _) => apply(v, alist.clone()),
         _ => Ok(eval_atom(v, alist.clone())),
     }
 }

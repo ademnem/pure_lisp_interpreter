@@ -7,9 +7,6 @@ Pure Lisp interpreter in Rust
 [X] add sexpr_to_string tests
 [X] add tests for proper lists
 [X] ' short hand for quote
-[ ] redo . short hand for creating improper lists (requires cons and only in quote)
-- (+ 1 1 . 1) => 2
-[ ] figure out how to do lambdas (just store the list for the function?)
 
 **_Functions_**  
 [X] quote  
@@ -39,5 +36,7 @@ basically the second value gets concatenated to the first
     ((conditional) (return value))
     (t (return value))
 )
-[ ] defun (what happens if a param is nil?) 
+[X] defun (what happens if a param is nil?) 
+- just push it to the oblist 
 [ ] eq (address equality / literal equality) (requires string interning)
+- how do i do this without making unsafe code in rust? is it possible? something to come back to

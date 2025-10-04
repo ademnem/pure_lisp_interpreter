@@ -8,7 +8,6 @@ pub enum Sexpr {
     String(String),
     Symbol(String),
     List(Vec<Sexpr>),
-    Lambda(String, Vec<Sexpr>),
     T,
     Nil,
 }
@@ -48,19 +47,6 @@ pub fn sexpr_to_string(v: &Sexpr) -> String {
                 }
                 str += ")";
             }
-            str
-        }
-        Sexpr::Lambda(name, body) => {
-            // not solidified yet
-            let mut str: String = String::from("(");
-            str += name;
-            str += " ";
-            for sexpr in &body[1..body.len() - 1] {
-                str += sexpr_to_string(sexpr).as_str();
-                str += " ";
-            }
-            str += sexpr_to_string(&body[body.len() - 1]).as_str();
-            str += ")";
             str
         }
     }
